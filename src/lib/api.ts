@@ -1,7 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { auth } from './firebase';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Same-origin /api — Next.js rewrites to Django locally and to Render on Vercel
+// (set NEXT_PUBLIC_API_URL or API_URL at build time to the Render host, no trailing slash).
+const BASE_URL = '';
 
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -39,7 +41,7 @@ export const dashboardApi = {
 
 // ─── Contracts ───────────────────────────────────────────────────────────────
 export const contractsApi = {
-  list: (params?: { status?: string; client_id?: string }) =>
+  list: (params?: { status?: string; client_id?: string; search?: string }) =>
     api.get('/api/contracts/', { params }),
   get: (id: string) => api.get(`/api/contracts/${id}/`),
   create: (data: Record<string, unknown>) => api.post('/api/contracts/', data),
@@ -63,18 +65,6 @@ export const contractsApi = {
     api.post(`/api/contracts/${id}/renew/`, data),
   versions: (id: string) => api.get(`/api/contracts/${id}/versions/`),
   fileUrl: (id: string) => api.get(`/api/contracts/${id}/file-url/`),
-  /** Record PH approval — pass FormData with ph_approval_type + optional ph_approval_image + ph_approval_email_body */
-  phApproval: (id: string, form: FormData) =>
-    api.post(`/api/contracts/${id}/ph-approval/`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
-  removePHApproval: (id: string) =>
-    api.delete(`/api/contracts/${id}/ph-approval/`),
-  /** Mark main contract as uploaded — optionally attach final file */
-  uploadMainContract: (id: string, form: FormData) =>
-    api.post(`/api/contracts/${id}/main-contract/`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
   /** Comments */
   getComments: (id: string) => api.get(`/api/contracts/${id}/comments/`),
   addComment: (id: string, text: string) =>

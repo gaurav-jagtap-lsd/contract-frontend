@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { contractsApi, remindersApi } from '@/lib/api';
 import type { Contract, ContractComment } from '@/types';
@@ -9,7 +9,7 @@ import {
 import {
   ArrowLeft, Download, Trash2, Pause, Play, RefreshCw, ExternalLink, Bell,
   Calendar, Mail, Tag, FileText, AlertTriangle, CheckCircle, Clock, Loader2,
-  ShieldCheck, Camera, Upload, X, Image as ImageIcon, MessageSquare, Send,
+  MessageSquare, Send,
 } from 'lucide-react';
 
 import Link from 'next/link';
@@ -28,39 +28,6 @@ function FieldRow({ label, value, warn }: { label: string; value?: string | null
   );
 }
 
-/** Progress bar + countdown for PH 30-day timer */
-function PHTimerBar({ phApprovedAt, mainUploaded }: { phApprovedAt: string; mainUploaded?: boolean }) {
-  const approved = new Date(phApprovedAt);
-  const now = new Date();
-  const elapsed = Math.floor((now.getTime() - approved.getTime()) / (1000 * 60 * 60 * 24));
-  const daysLeft = 30 - elapsed;
-  const isOverdue = elapsed > 30;
-  const pct = Math.min(100, Math.round((elapsed / 30) * 100));
-
-  if (mainUploaded) return null;
-
-  const barColor = isOverdue ? 'bg-red-500' : elapsed >= 23 ? 'bg-orange-500' : elapsed >= 15 ? 'bg-yellow-400' : 'bg-emerald-500';
-  const textColor = isOverdue ? 'text-red-600' : elapsed >= 23 ? 'text-orange-600' : elapsed >= 15 ? 'text-yellow-600' : 'text-emerald-600';
-
-  return (
-    <div className="mt-3 p-3 bg-ink-50 rounded-xl border border-ink-200">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs text-ink-500 font-medium">Main Contract Upload Timer</span>
-        <span className={`text-xs font-bold ${textColor}`}>
-          {isOverdue ? `Overdue by ${Math.abs(daysLeft)}d` : `${daysLeft}d left`}
-        </span>
-      </div>
-      <div className="h-2 bg-ink-200 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
-      </div>
-      <div className="flex justify-between mt-1">
-        <span className="text-[10px] text-ink-400">Day {elapsed}</span>
-        <span className="text-[10px] text-ink-400">Day 30</span>
-      </div>
-    </div>
-  );
-}
-
 export default function ContractDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -68,22 +35,6 @@ export default function ContractDetailPage() {
   const [loading, setLoading] = useState(true);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState('');
-
-  // PH Approval form state
-  const [showPHForm, setShowPHForm] = useState(false);
-  const [phType, setPHType] = useState<'screenshot' | 'mail'>('mail');
-  const [phImage, setPHImage] = useState<File | null>(null);
-  const [phImagePreview, setPHImagePreview] = useState<string | null>(null);
-  const [phEmailBody, setPHEmailBody] = useState('');
-  const [submittingPH, setSubmittingPH] = useState(false);
-  const phFileRef = useRef<HTMLInputElement>(null);
-
-
-  // Main contract upload state
-  const [showMainUpload, setShowMainUpload] = useState(false);
-  const [mainFile, setMainFile] = useState<File | null>(null);
-  const [uploadingMain, setUploadingMain] = useState(false);
-  const mainFileRef = useRef<HTMLInputElement>(null);
 
   // Comments state
   const [comments, setComments] = useState<ContractComment[]>([]);
@@ -169,16 +120,6 @@ export default function ContractDetailPage() {
     }
   };
 
-  const handlePHImageChange = (file: File | null) => {
-    setPHImage(file);
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPHImagePreview(url);
-    } else {
-      setPHImagePreview(null);
-    }
-  };
-
   const handleAddComment = async () => {
     if (!commentText.trim()) { toast.error('Comment cannot be empty.'); return; }
     setAddingComment(true);
@@ -215,66 +156,6 @@ export default function ContractDetailPage() {
 
 
 
-  const handlePHSubmit = async () => {
-    if (phType === 'screenshot' && !phImage) {
-      toast.error('Please select a screenshot image.');
-      return;
-    }
-    setSubmittingPH(true);
-    try {
-      const form = new FormData();
-      form.append('ph_approval_type', phType);
-      if (phType === 'screenshot' && phImage) {
-        form.append('ph_approval_image', phImage);
-      }
-      if (phEmailBody.trim()) {
-        form.append('ph_approval_email_body', phEmailBody.trim());
-      }
-      await contractsApi.phApproval(id, form);
-      toast.success('PH approval recorded! 30-day upload timer started.');
-      setShowPHForm(false);
-      setPHImage(null);
-      setPHImagePreview(null);
-      setPHEmailBody('');
-      await load();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to record PH approval.');
-    } finally {
-
-      setSubmittingPH(false);
-    }
-  };
-
-  const handleRemovePH = async () => {
-    if (!confirm('Remove PH approval? The 30-day timer will be cleared.')) return;
-    try {
-      await contractsApi.removePHApproval(id);
-      toast.success('PH approval removed.');
-      await load();
-    } catch {
-      toast.error('Failed to remove PH approval.');
-    }
-  };
-
-  const handleMainContractUpload = async () => {
-    if (!mainFile) { toast.error('Please select a file.'); return; }
-    setUploadingMain(true);
-    try {
-      const form = new FormData();
-      form.append('file', mainFile);
-      await contractsApi.uploadMainContract(id, form);
-      toast.success('Main contract uploaded! 30-day timer cleared.');
-      setShowMainUpload(false);
-      setMainFile(null);
-      await load();
-      await loadFileUrl();
-    } catch {
-      toast.error('Upload failed. Please try again.');
-    } finally {
-      setUploadingMain(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -287,9 +168,6 @@ export default function ContractDetailPage() {
 
   const status = contract.computed_status || contract.status;
   const days = contract.days_remaining ?? daysRemaining(contract.end_date);
-  const isPHApproved = contract.ph_approved === true;
-  const isMainUploaded = contract.main_contract_uploaded === true;
-  const isPHPending = isPHApproved && !isMainUploaded;
 
   return (
     <div className="space-y-5 animate-fade-in max-w-5xl">
@@ -303,23 +181,6 @@ export default function ContractDetailPage() {
             <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary text-xs">
               <ExternalLink className="w-3.5 h-3.5" /> View Document
             </a>
-          )}
-          {/* PH Approval quick action */}
-          {!isPHApproved && (
-            <button
-              onClick={() => setShowPHForm(true)}
-              className="btn-secondary text-xs"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-yellow-500" /> Mark PH Approved
-            </button>
-          )}
-          {isPHPending && (
-            <button
-              onClick={() => setShowMainUpload(true)}
-              className="btn-secondary text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-            >
-              <Upload className="w-3.5 h-3.5" /> Upload Main Contract
-            </button>
           )}
           <button onClick={handleSendReminder} disabled={!!actionLoading} className="btn-secondary text-xs">
             {actionLoading === 'remind' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
@@ -347,16 +208,6 @@ export default function ContractDetailPage() {
           </div>
           <div className="flex flex-col items-end gap-2">
             <span className={`badge text-sm px-3 py-1 ${statusColor(status)}`}>{statusLabel(status)}</span>
-            {isPHApproved && !isMainUploaded && (
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-yellow-100 text-yellow-700 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> PH Approved — Main Contract Pending
-              </span>
-            )}
-            {isPHApproved && isMainUploaded && (
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 flex items-center gap-1">
-                <CheckCircle className="w-3 h-3" /> Main Contract Uploaded
-              </span>
-            )}
             {days !== null && (
               <span className={cn(
                 'text-xs font-semibold px-2.5 py-1 rounded-lg',
@@ -490,227 +341,6 @@ export default function ContractDetailPage() {
 
         {/* Sidebar */}
         <div className="space-y-5">
-
-          {/* ── PH Approval Card ── */}
-          <div className={cn(
-            'card p-5',
-            isPHPending && 'ring-2 ring-yellow-300 ring-offset-1'
-          )}>
-            <div className="flex items-center gap-2 mb-3">
-              <ShieldCheck className={cn('w-4 h-4', isPHApproved ? (isMainUploaded ? 'text-emerald-500' : 'text-yellow-500') : 'text-ink-300')} />
-              <h2 className="text-sm font-semibold text-ink-900">PH Approval</h2>
-              {isPHApproved && !isMainUploaded && (
-                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700">PENDING</span>
-              )}
-              {isMainUploaded && (
-                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">COMPLETE</span>
-              )}
-            </div>
-
-            {!isPHApproved && !showPHForm && (
-              <div className="space-y-3">
-                <p className="text-xs text-ink-400">No PH approval recorded yet. Mark PH approved to start the 30-day main contract upload timer.</p>
-                <button
-                  onClick={() => setShowPHForm(true)}
-                  className="btn-secondary w-full justify-center text-xs"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-yellow-500" /> Mark PH Approved
-                </button>
-              </div>
-            )}
-
-            {/* PH Approval Form */}
-            {showPHForm && !isPHApproved && (
-              <div className="space-y-3">
-                {/* Type selector */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setPHType('mail'); setPHImage(null); setPHImagePreview(null); }}
-                    className={cn(
-                      'flex-1 text-xs py-2 rounded-lg border font-medium transition-all',
-                      phType === 'mail' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200 hover:border-ink-300'
-                    )}
-                  >
-                    ✉ Mail Approval
-                  </button>
-                  <button
-                    onClick={() => setPHType('screenshot')}
-                    className={cn(
-                      'flex-1 text-xs py-2 rounded-lg border font-medium transition-all flex items-center justify-center gap-1',
-                      phType === 'screenshot' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200 hover:border-ink-300'
-                    )}
-                  >
-                    <Camera className="w-3 h-3" /> Screenshot
-                  </button>
-                </div>
-
-                {/* Screenshot upload */}
-                {phType === 'screenshot' && (
-                  <div>
-                    <input
-                      ref={phFileRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/jpg"
-                      className="hidden"
-                      onChange={(e) => handlePHImageChange(e.target.files?.[0] ?? null)}
-                    />
-                    {phImagePreview ? (
-                      <div className="relative">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={phImagePreview}
-                          alt="PH approval screenshot preview"
-                          className="w-full rounded-lg object-contain max-h-40 border border-ink-200"
-                        />
-                        <button
-                          onClick={() => { setPHImage(null); setPHImagePreview(null); if (phFileRef.current) phFileRef.current.value = ''; }}
-                          className="absolute top-1 right-1 p-1 bg-white rounded-full shadow text-ink-500 hover:text-red-500"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => phFileRef.current?.click()}
-                        className="w-full border-2 border-dashed border-ink-200 rounded-xl py-4 flex flex-col items-center gap-2 text-ink-400 hover:border-brand-400 hover:text-brand-500 transition-colors"
-                      >
-                        <ImageIcon className="w-6 h-6" />
-                        <span className="text-xs">Click to upload screenshot</span>
-                        <span className="text-[10px] text-ink-300">JPG, PNG up to 25MB</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Email body — optional for both types */}
-                <div>
-                  <label className="text-[11px] font-medium text-ink-500 mb-1 block">
-                    Approval Email <span className="text-ink-300 font-normal">(optional — paste email content)</span>
-                  </label>
-                  <textarea
-                    rows={4}
-                    placeholder="Paste the approval email here…"
-                    value={phEmailBody}
-                    onChange={(e) => setPHEmailBody(e.target.value)}
-                    className="w-full text-xs rounded-lg border border-ink-200 p-2.5 text-ink-800 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent resize-none bg-white"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={handlePHSubmit}
-                    disabled={submittingPH || (phType === 'screenshot' && !phImage)}
-                    className="btn-primary flex-1 justify-center text-xs disabled:opacity-50"
-                  >
-                    {submittingPH ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                    {submittingPH ? 'Saving…' : 'Confirm PH Approval'}
-                  </button>
-                  <button onClick={() => { setShowPHForm(false); setPHImage(null); setPHImagePreview(null); setPHEmailBody(''); }} className="btn-ghost text-xs px-3">
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-
-
-            {/* PH Approved — show details */}
-            {isPHApproved && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-ink-500">Approval Type</span>
-                  <span className="font-medium text-ink-800 flex items-center gap-1">
-                    {contract.ph_approval_type === 'screenshot'
-                      ? <><Camera className="w-3 h-3" /> Screenshot</>
-                      : '✉ Mail Approval'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-ink-500">Approved On</span>
-                  <span className="font-medium text-ink-800">{formatDate(contract.ph_approved_at)}</span>
-                </div>
-                {isMainUploaded && (
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-ink-500">Main Contract</span>
-                    <span className="font-medium text-emerald-600 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" /> Uploaded {formatDate(contract.main_contract_uploaded_at)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Screenshot thumbnail */}
-                {contract.ph_approval_type === 'screenshot' && contract.ph_approval_image_path && (
-                  <div className="mt-2 p-2 bg-ink-50 rounded-lg border border-ink-200">
-                    <div className="flex items-center gap-2 text-xs text-ink-500">
-                      <ImageIcon className="w-3.5 h-3.5" />
-                      <span className="truncate">{contract.ph_approval_image_name || 'Screenshot uploaded'}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Saved email body */}
-                {contract.ph_approval_email_body && (
-                  <div className="mt-2">
-                    <div className="text-[11px] font-medium text-ink-500 mb-1">Approval Email</div>
-                    <div className="bg-ink-50 border border-ink-200 rounded-lg p-2.5 text-xs text-ink-700 whitespace-pre-wrap max-h-32 overflow-y-auto leading-relaxed">
-                      {contract.ph_approval_email_body}
-                    </div>
-                  </div>
-                )}
-
-
-                {/* 30-day timer bar */}
-                {contract.ph_approved_at && (
-                  <PHTimerBar phApprovedAt={contract.ph_approved_at} mainUploaded={isMainUploaded} />
-                )}
-
-                {/* Upload Main Contract CTA */}
-                {!isMainUploaded && !showMainUpload && (
-                  <button
-                    onClick={() => setShowMainUpload(true)}
-                    className="btn-primary w-full justify-center text-xs mt-2"
-                  >
-                    <Upload className="w-3.5 h-3.5" /> Upload Main Contract
-                  </button>
-                )}
-
-                {/* Main contract upload form */}
-                {showMainUpload && (
-                  <div className="mt-2 space-y-2">
-                    <input
-                      ref={mainFileRef}
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className="w-full text-xs text-ink-600"
-                      onChange={(e) => setMainFile(e.target.files?.[0] ?? null)}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleMainContractUpload}
-                        disabled={!mainFile || uploadingMain}
-                        className="btn-primary flex-1 justify-center text-xs disabled:opacity-50"
-                      >
-                        {uploadingMain ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                        {uploadingMain ? 'Uploading…' : 'Confirm'}
-                      </button>
-                      <button onClick={() => { setShowMainUpload(false); setMainFile(null); }} className="btn-ghost text-xs px-3">
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Remove PH approval */}
-                {!isMainUploaded && (
-                  <button
-                    onClick={handleRemovePH}
-                    className="text-xs text-ink-400 hover:text-red-500 transition-colors mt-1 w-full text-center"
-                  >
-                    Remove PH Approval
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
 
           {/* Reminder emails */}
           <div className="card p-5">

@@ -31,8 +31,11 @@ export default function LoginPage() {
       toast.success('Welcome back!');
       router.push('/dashboard');
     } catch (err: unknown) {
-      const msg = (err as { message?: string })?.message || 'Login failed.';
-      if (msg.includes('wrong-password') || msg.includes('user-not-found') || msg.includes('invalid-credential')) {
+      const ax = err as { code?: string; message?: string };
+      const msg = ax?.message || 'Login failed.';
+      if (ax?.code === 'ERR_NETWORK' || msg === 'Network Error') {
+        toast.error('Cannot reach the API. Confirm Django is running on port 8000.');
+      } else if (msg.includes('wrong-password') || msg.includes('user-not-found') || msg.includes('invalid-credential')) {
         toast.error('Invalid email or password.');
       } else {
         toast.error(msg);

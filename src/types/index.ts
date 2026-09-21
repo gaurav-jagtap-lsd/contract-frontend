@@ -32,6 +32,17 @@ export interface ContractService {
 
 export type ContractStatus = 'active' | 'paused' | 'expiring_soon' | 'expired' | 'renewed' | 'archived';
 
+export const PIPELINE_STEPS = [
+  'Initiated',
+  'Commercial Shared',
+  'Negotiation',
+  'Approval',
+  'SOW/Draft shared',
+  'Signed',
+] as const;
+
+export type PipelineStep = (typeof PIPELINE_STEPS)[number];
+
 export interface Contract {
   id: string;
   owner_uid: string;
@@ -71,16 +82,7 @@ export interface Contract {
   notes: string;
   created_at: string;
   updated_at: string;
-  // PH Approval fields
-  ph_approved?: boolean;
-  ph_approved_at?: string;
-  ph_approval_type?: 'screenshot' | 'mail';
-  ph_approval_image_path?: string;
-  ph_approval_image_name?: string;
-  ph_approval_image_url?: string;
-  ph_approval_email_body?: string;
-  main_contract_uploaded?: boolean;
-  main_contract_uploaded_at?: string;
+  pipeline_step?: PipelineStep | string;
 }
 
 export interface ContractComment {
@@ -94,18 +96,6 @@ export interface ContractComment {
   updated_at: string;
 }
 
-
-export interface PHPendingContract {
-  id: string;
-  contract_name: string;
-  client_name: string;
-  ph_approved_at: string;
-  ph_approval_type: 'screenshot' | 'mail';
-  ph_approval_image_path?: string;
-  days_elapsed: number;
-  days_remaining_in_30: number;
-  is_overdue: boolean;
-}
 
 export interface ExtractedData {
   client_name: string | null;
@@ -147,7 +137,6 @@ export interface DashboardSummary {
   expiring_in_60_days: number;
   expiring_in_30_days: number;
   expired_contracts: number;
-  ph_approved_pending_main_contract: number;
 }
 
 export interface ReminderLog {

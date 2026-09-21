@@ -1,17 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { dashboardApi, contractsApi } from '@/lib/api';
-import type { DashboardSummary, Contract, PHPendingContract } from '@/types';
-import { formatDate, statusColor, statusLabel, daysRemaining } from '@/lib/utils';
+import { dashboardApi } from '@/lib/api';
+import type { DashboardSummary, Contract } from '@/types';
+import { formatDate, daysRemaining } from '@/lib/utils';
 import {
   FileText, Users, AlertCircle, CheckCircle, Clock, TrendingUp, Upload, ChevronRight,
-  ShieldCheck, AlertTriangle, Camera,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import toast from 'react-hot-toast';
 
 const COLORS = ['#5b6ef2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -33,41 +31,14 @@ function StatCard({
   return href ? <Link href={href}>{inner}</Link> : inner;
 }
 
-/** Visual progress bar showing elapsed days out of 30 */
-function PHCountdownBar({ daysElapsed, isOverdue }: { daysElapsed: number; isOverdue: boolean }) {
-  const pct = Math.min(100, Math.round((daysElapsed / 30) * 100));
-  const barColor = isOverdue
-    ? 'bg-red-500'
-    : daysElapsed >= 23
-    ? 'bg-orange-500'
-    : daysElapsed >= 15
-    ? 'bg-yellow-400'
-    : 'bg-emerald-500';
-
-  return (
-    <div className="flex items-center gap-2 mt-1.5">
-      <div className="flex-1 h-1.5 bg-ink-100 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-[11px] text-ink-400 whitespace-nowrap">{daysElapsed}/30d</span>
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [charts, setCharts] = useState<{
     monthly_expiry_trend: { month: string; count: number }[];
     service_type_distribution: { type: string; count: number }[];
     upcoming_renewals: Contract[];
-    ph_pending_contracts: PHPendingContract[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Main contract upload modal state
-  const [uploadingMainFor, setUploadingMainFor] = useState<string | null>(null);
-  const [mainFile, setMainFile] = useState<File | null>(null);
-  const [uploadingMain, setUploadingMain] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -87,27 +58,6 @@ export default function DashboardPage() {
     fetch();
   }, []);
 
-  const handleMainContractUpload = async (contractId: string) => {
-    if (!mainFile) { toast.error('Please select a file.'); return; }
-    setUploadingMain(true);
-    try {
-      const form = new FormData();
-      form.append('file', mainFile);
-      await contractsApi.uploadMainContract(contractId, form);
-      toast.success('Main contract uploaded! 30-day timer cleared.');
-      setUploadingMainFor(null);
-      setMainFile(null);
-      // Refresh charts/summary
-      const [sumRes, chartRes] = await Promise.all([dashboardApi.summary(), dashboardApi.charts()]);
-      setSummary(sumRes.data.data);
-      setCharts(chartRes.data.data);
-    } catch {
-      toast.error('Upload failed. Please try again.');
-    } finally {
-      setUploadingMain(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -125,7 +75,6 @@ export default function DashboardPage() {
   }
 
   const s = summary;
-  const phPending = charts?.ph_pending_contracts ?? [];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -154,15 +103,6 @@ export default function DashboardPage() {
           color="bg-sky-100 text-sky-600"
           sub="Needs attention"
         />
-        {/* NEW: PH Pending Stat Card */}
-        <StatCard
-          label="PH Approved"
-          value={s?.ph_approved_pending_main_contract ?? 0}
-          icon={ShieldCheck}
-          color={(s?.ph_approved_pending_main_contract ?? 0) > 0 ? 'bg-yellow-100 text-yellow-600' : 'bg-ink-100 text-ink-400'}
-          sub="Pending main contract"
-          href="/contracts?status=ph_pending"
-        />
       </div>
 
       {/* Quick action (moved inline) */}
@@ -171,126 +111,6 @@ export default function DashboardPage() {
           <Upload className="w-3.5 h-3.5" /> Upload Contract
         </Link>
       </div>
-
-      {/* ── PH Approval 30-Day Pending Section ── */}
-      {phPending.length > 0 && (
-        <div className="card">
-          {/* Header */}
-          <div className="px-5 py-4 border-b border-ink-100 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center">
-                <ShieldCheck className="w-4 h-4 text-yellow-600" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-ink-900">
-                  PH Approval — 30-Day Upload Reminder
-                </div>
-                <div className="text-xs text-ink-400">
-                  {phPending.length} contract{phPending.length !== 1 ? 's' : ''} pending main contract upload
-                </div>
-              </div>
-            </div>
-            <Link href="/contracts?status=ph_pending" className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1">
-              View all <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-
-          {/* Contract rows */}
-          <div className="divide-y divide-ink-50">
-            {phPending.map((c) => {
-              const isOverdue = c.is_overdue;
-              const daysLeft = c.days_remaining_in_30;
-              const elapsed = c.days_elapsed;
-
-              const urgencyBadge = isOverdue
-                ? 'bg-red-100 text-red-700'
-                : (daysLeft ?? 30) <= 7
-                ? 'bg-orange-100 text-orange-700'
-                : (daysLeft ?? 30) <= 15
-                ? 'bg-yellow-100 text-yellow-700'
-                : 'bg-emerald-100 text-emerald-700';
-
-              return (
-                <div key={c.id} className="px-5 py-4">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Link
-                          href={`/contracts/${c.id}`}
-                          className="text-sm font-semibold text-ink-900 hover:text-brand-600 truncate"
-                        >
-                          {c.contract_name}
-                        </Link>
-                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${urgencyBadge}`}>
-                          {isOverdue
-                            ? `⚠ Overdue by ${Math.abs(daysLeft ?? 0)}d`
-                            : `${daysLeft}d left`}
-                        </span>
-                        {c.ph_approval_type && (
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-100 flex items-center gap-1">
-                            {c.ph_approval_type === 'screenshot'
-                              ? <><Camera className="w-2.5 h-2.5" /> Screenshot</>
-                              : '✉ Mail Approval'}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-ink-400 mt-0.5">{c.client_name}</div>
-                      <div className="text-xs text-ink-400 mt-0.5">
-                        PH approved: {formatDate(c.ph_approved_at)}
-                      </div>
-                      {/* Progress bar */}
-                      <PHCountdownBar daysElapsed={elapsed ?? 0} isOverdue={isOverdue} />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Link
-                        href={`/contracts/${c.id}`}
-                        className="btn-secondary text-xs py-1.5 px-3"
-                      >
-                        View
-                      </Link>
-                      <button
-                        onClick={() => { setUploadingMainFor(c.id); setMainFile(null); }}
-                        className="btn-primary text-xs py-1.5 px-3"
-                      >
-                        <Upload className="w-3 h-3" /> Upload Main Contract
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Inline upload panel */}
-                  {uploadingMainFor === c.id && (
-                    <div className="mt-3 p-3 bg-ink-50 rounded-xl border border-ink-200 flex items-center gap-3 flex-wrap">
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="text-xs text-ink-600 flex-1 min-w-0"
-                        onChange={(e) => setMainFile(e.target.files?.[0] ?? null)}
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleMainContractUpload(c.id)}
-                          disabled={!mainFile || uploadingMain}
-                          className="btn-primary text-xs py-1.5 px-3 disabled:opacity-50"
-                        >
-                          {uploadingMain ? 'Uploading…' : 'Confirm Upload'}
-                        </button>
-                        <button
-                          onClick={() => setUploadingMainFor(null)}
-                          className="btn-ghost text-xs py-1.5 px-3"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
