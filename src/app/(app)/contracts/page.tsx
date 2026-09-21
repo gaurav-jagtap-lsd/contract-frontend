@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { contractsApi } from '@/lib/api';
 import type { Contract, ContractComment, PipelineStep } from '@/types';
 import { PIPELINE_STEPS } from '@/types';
-import { formatDate, statusColor, statusLabel, daysRemaining } from '@/lib/utils';
+import { formatDate, statusColor, statusLabel, daysRemaining, pipelineStepClass } from '@/lib/utils';
 import {
   Plus, Search, Eye, Pause, Play, Trash2, Loader2, FileText, Edit2, Upload,
   X, MessageSquare, Send,
@@ -169,8 +169,8 @@ export default function ContractsPage() {
   const searchParams = useSearchParams();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('q')?.trim() || '');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
   const [commentsModalFor, setCommentsModalFor] = useState<{ id: string; name: string } | null>(null);
   const [updatingStepId, setUpdatingStepId] = useState<string | null>(null);
@@ -338,6 +338,7 @@ export default function ContractsPage() {
                   <th className="table-header hidden lg:table-cell">Service Dates</th>
                   <th className="table-header">Status</th>
                   <th className="table-header hidden md:table-cell">Days Left</th>
+                  <th className="table-header">Current State</th>
                   <th className="table-header text-right">Actions</th>
                 </tr>
               </thead>
@@ -416,27 +417,30 @@ export default function ContractsPage() {
                         ) : '—'}
                       </td>
                       <td className="table-cell">
-                        <div className="flex items-center justify-end gap-2">
-                          <select
-                            aria-label={`Pipeline step for ${c.client_name}`}
-                            className="input py-1.5 pr-8 text-xs w-[168px] flex-shrink-0"
-                            value={step}
-                            disabled={updatingStepId === c.id}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => handleStepChange(c.id, e.target.value as PipelineStep)}
-                          >
-                            {PIPELINE_STEPS.map((option) => (
-                              <option key={option} value={option}>{option}</option>
-                            ))}
-                          </select>
-                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <select
+                          aria-label={`Current state for ${c.client_name}`}
+                          className={cn(
+                            'input py-1.5 pr-8 text-xs w-[170px] font-medium',
+                            pipelineStepClass(step)
+                          )}
+                          value={step}
+                          disabled={updatingStepId === c.id}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => handleStepChange(c.id, e.target.value as PipelineStep)}
+                        >
+                          {PIPELINE_STEPS.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="table-cell">
+                        <div className="flex items-center justify-end gap-0.5">
                           <Link href={`/contracts/${c.id}`} className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View">
                             <Eye className="w-4 h-4" />
                           </Link>
                           <Link href={`/contracts/${c.id}/edit`} className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="Edit">
                             <Edit2 className="w-4 h-4" />
                           </Link>
-                          {/* Comments quick-action */}
                           <button
                             onClick={() => setCommentsModalFor({ id: c.id, name: c.contract_name })}
                             className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
@@ -458,7 +462,6 @@ export default function ContractsPage() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                          </div>
                         </div>
                       </td>
 

@@ -53,6 +53,18 @@ export function statusColor(status: ContractStatus | string): string {
   return map[status] || 'bg-ink-100 text-ink-600 border-ink-200';
 }
 
+export function pipelineStepClass(step?: string | null): string {
+  const map: Record<string, string> = {
+    Initiated: 'bg-ink-50 text-ink-700 border-ink-200',
+    'Commercial Shared': 'bg-sky-50 text-sky-800 border-sky-200',
+    Negotiation: 'bg-violet-50 text-violet-800 border-violet-200',
+    Approval: 'bg-amber-50 text-amber-800 border-amber-200',
+    'SOW/Draft shared': 'bg-orange-50 text-orange-800 border-orange-200',
+    Signed: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  };
+  return map[step || ''] || 'bg-ink-50 text-ink-700 border-ink-200';
+}
+
 export function confidenceColor(score: number): string {
   if (score >= 0.85) return 'text-emerald-600';
   if (score >= 0.65) return 'text-amber-600';
