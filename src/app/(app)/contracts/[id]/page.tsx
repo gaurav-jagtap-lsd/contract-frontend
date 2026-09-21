@@ -9,7 +9,7 @@ import {
 import {
   ArrowLeft, Download, Trash2, Pause, Play, RefreshCw, ExternalLink, Bell,
   Calendar, Mail, Tag, FileText, AlertTriangle, CheckCircle, Clock, Loader2,
-  MessageSquare, Send,
+  X, MessageSquare, Send,
 } from 'lucide-react';
 
 import Link from 'next/link';
