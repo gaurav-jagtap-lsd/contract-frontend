@@ -42,7 +42,7 @@ export default function TopBar() {
   };
 
   return (
-    <header className="h-16 bg-white/90 backdrop-blur-md border-b border-ink-200 flex items-center px-4 sm:px-6 gap-3 sticky top-0 z-20">
+    <header className="h-16 bg-white border-b border-ink-200 flex items-center px-4 sm:px-6 gap-3 sticky top-0 z-20 shadow-sm">
       <button
         type="button"
         onClick={toggleSidebar}
