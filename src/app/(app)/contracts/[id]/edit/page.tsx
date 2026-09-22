@@ -448,13 +448,13 @@ export default function EditContractPage() {
         </div>
 
         {services.length === 0 ? (
-          <div className="text-sm text-ink-400 text-center py-6 border-2 border-dashed border-ink-200 rounded-xl">
+          <div className="text-sm text-ink-400 text-center py-6 border-2 border-dashed border-ink-200 rounded-sm">
             No services attached. Click "Add Service" to add one.
           </div>
         ) : (
           <div className="space-y-4 mt-4">
             {services.map((s, i) => (
-              <div key={i} className="bg-ink-50 rounded-xl p-4 space-y-3">
+              <div key={i} className="bg-ink-50 rounded-sm p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-ink-600 uppercase tracking-wide">
                     Service {i + 1}

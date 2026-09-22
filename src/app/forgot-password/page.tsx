@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import AuthShell from '@/components/layout/AuthShell';
-import { FileSearch, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -28,16 +28,14 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthShell>
-      <div className="flex items-center gap-2 mb-8 lg:hidden">
-        <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
-          <FileSearch className="w-4 h-4 text-white" />
-        </div>
-        <span className="text-lg font-semibold text-ink-900">ContractVault</span>
+      <div className="mb-8 lg:hidden">
+        <div className="font-serif text-2xl text-ink-900 leading-none">ContractVault</div>
+        <div className="mt-1.5 text-[10px] uppercase tracking-[0.18em] text-ink-500">AI Contract Management</div>
       </div>
 
       {sent ? (
         <div className="text-center py-2">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-sm bg-emerald-50 flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-7 h-7 text-emerald-500" />
           </div>
           <h2 className="text-xl font-bold text-ink-900 mb-2">Check your inbox</h2>

@@ -4,29 +4,23 @@ import { dashboardApi, contractsApi } from '@/lib/api';
 import type { DashboardSummary, Contract } from '@/types';
 import { formatDate, daysRemaining, statusColor, statusLabel, pipelineStepClass } from '@/lib/utils';
 import {
-  FileText, Users, AlertCircle, CheckCircle, Clock, TrendingUp, Upload, ChevronRight,
-  Search, Loader2,
+  Upload, ChevronRight, Search, Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts';
 
-const COLORS = ['#5b6ef2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = ['#7a382c', '#3c3731', '#8f867a', '#a86b5b', '#524c43'];
 
 function StatCard({
-  label, value, icon: Icon, color, sub, href,
-}: { label: string; value: number; icon: React.ElementType; color: string; sub?: string; href?: string }) {
+  label, value, sub, href,
+}: { label: string; value: number; sub?: string; href?: string }) {
   const inner = (
-    <div className="card p-5 flex items-start gap-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200">
-      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${color}`}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div>
-        <div className="text-2xl font-bold text-ink-900">{value}</div>
-        <div className="text-sm text-ink-500 mt-0.5">{label}</div>
-        {sub && <div className="text-xs text-ink-400 mt-0.5">{sub}</div>}
-      </div>
+    <div className="card px-4 py-4 hover:border-ink-400 transition-colors">
+      <div className="text-[11px] uppercase tracking-[0.14em] text-ink-500">{label}</div>
+      <div className="font-serif text-3xl text-ink-900 mt-2 tabular-nums">{value}</div>
+      {sub && <div className="text-xs text-ink-400 mt-1">{sub}</div>}
     </div>
   );
   return href ? <Link href={href}>{inner}</Link> : inner;
@@ -136,7 +130,7 @@ export default function DashboardPage() {
       {debouncedSearch && (
         <div className="card overflow-hidden">
           <div className="px-5 py-3 border-b border-ink-100 flex items-center justify-between">
-            <div className="text-sm font-semibold text-ink-900">Search results</div>
+            <div className="font-serif text-lg text-ink-900">Search results</div>
             <div className="text-xs text-ink-400">
               {searching ? 'Searching…' : `${searchResults.length} match${searchResults.length === 1 ? '' : 'es'}`}
             </div>
@@ -186,27 +180,23 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Contracts" value={s?.total_contracts ?? 0} icon={FileText} color="bg-brand-100 text-brand-600" href="/contracts" />
-        <StatCard label="Active" value={s?.active_contracts ?? 0} icon={CheckCircle} color="bg-emerald-100 text-emerald-600" href="/contracts?status=active" />
+        <StatCard label="Total Contracts" value={s?.total_contracts ?? 0} href="/contracts" />
+        <StatCard label="Active" value={s?.active_contracts ?? 0} href="/contracts?status=active" />
         <StatCard
           label="Expiring Soon"
           value={s?.expiring_in_30_days ?? 0}
-          icon={Clock}
-          color="bg-orange-100 text-orange-600"
           sub="Within 30 days"
           href="/contracts?status=expiring_soon"
         />
-        <StatCard label="Expired" value={s?.expired_contracts ?? 0} icon={AlertCircle} color="bg-red-100 text-red-600" href="/contracts?status=expired" />
+        <StatCard label="Expired" value={s?.expired_contracts ?? 0} href="/contracts?status=expired" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard label="Total Clients" value={s?.total_clients ?? 0} icon={Users} color="bg-violet-100 text-violet-600" href="/clients" />
-        <StatCard label="Paused" value={s?.paused_contracts ?? 0} icon={Clock} color="bg-amber-100 text-amber-600" href="/contracts?status=paused" />
+        <StatCard label="Total Clients" value={s?.total_clients ?? 0} href="/clients" />
+        <StatCard label="Paused" value={s?.paused_contracts ?? 0} href="/contracts?status=paused" />
         <StatCard
-          label="Expiring in 60d"
+          label="Expiring in 60 days"
           value={s?.expiring_in_60_days ?? 0}
-          icon={TrendingUp}
-          color="bg-sky-100 text-sky-600"
           sub="Needs attention"
         />
       </div>
@@ -215,7 +205,7 @@ export default function DashboardPage() {
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="text-sm font-semibold text-ink-900">Expiry Trend</div>
+              <div className="font-serif text-lg text-ink-900">Expiry Trend</div>
               <div className="text-xs text-ink-400">Monthly contract expirations</div>
             </div>
           </div>
@@ -223,20 +213,20 @@ export default function DashboardPage() {
             <AreaChart data={charts?.monthly_expiry_trend ?? []}>
               <defs>
                 <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#5b6ef2" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#5b6ef2" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#7a382c" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#7a382c" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-              <Area type="monotone" dataKey="count" stroke="#5b6ef2" fill="url(#expGrad)" strokeWidth={2} />
+              <Area type="monotone" dataKey="count" stroke="#7a382c" fill="url(#expGrad)" strokeWidth={1.5} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         <div className="card p-5">
-          <div className="text-sm font-semibold text-ink-900 mb-1">Service Types</div>
+          <div className="font-serif text-lg text-ink-900 mb-1">Service Types</div>
           <div className="text-xs text-ink-400 mb-4">Contract breakdown</div>
           {(charts?.service_type_distribution?.length ?? 0) > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
@@ -269,7 +259,7 @@ export default function DashboardPage() {
       <div className="card">
         <div className="px-5 py-4 border-b border-ink-100 flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold text-ink-900">Upcoming Renewals</div>
+            <div className="font-serif text-lg text-ink-900">Upcoming Renewals</div>
             <div className="text-xs text-ink-400">Contracts expiring within 90 days</div>
           </div>
           <Link href="/contracts?status=expiring_soon" className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1">

@@ -190,7 +190,7 @@ function UploadStep({
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       {/* Mode selection toggle */}
-      <div className="flex p-1 bg-ink-100 rounded-xl max-w-md mx-auto border border-ink-200 shadow-inner">
+      <div className="flex p-1 bg-ink-100 rounded-sm max-w-md mx-auto border border-ink-200 shadow-inner">
         <button
           type="button"
           className="flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 bg-white text-brand-700 shadow-sm transition-all"
@@ -207,13 +207,13 @@ function UploadStep({
       </div>
 
       <div>
-        <h2 className="text-xl font-bold text-ink-900">Upload Contract</h2>
-        <p className="text-sm text-ink-500 mt-1">Upload a PDF or image. Gemini AI will extract all contract details automatically.</p>
+        <h2 className="text-xl text-ink-900">Upload Contract</h2>
+        <p className="text-sm text-ink-500 mt-1">Upload a PDF or image. Gemini will extract the contract details. Review them before you save.</p>
       </div>
       <div
         {...getRootProps()}
         className={cn(
-          'border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all',
+          'border-2 border-dashed rounded-sm p-12 text-center cursor-pointer transition-all',
           isDragActive ? 'border-brand-500 bg-brand-50' :
           file ? 'border-emerald-400 bg-emerald-50' :
           'border-ink-200 hover:border-brand-400 hover:bg-brand-50/30'
@@ -222,7 +222,7 @@ function UploadStep({
         <input {...getInputProps()} />
         {file ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-sm bg-emerald-100 flex items-center justify-center">
               <CheckCircle className="w-7 h-7 text-emerald-600" />
             </div>
             <div>
@@ -236,7 +236,7 @@ function UploadStep({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-ink-100 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-sm bg-ink-100 flex items-center justify-center">
               <Upload className="w-7 h-7 text-ink-400" />
             </div>
             <div>
@@ -247,13 +247,13 @@ function UploadStep({
         )}
       </div>
       {file && (
-        <div className="bg-brand-50 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-brand-50 rounded-sm p-4 flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0 mt-0.5">
             <FileText className="w-4 h-4 text-brand-600" />
           </div>
           <div>
             <div className="text-sm font-medium text-brand-900">AI Extraction Ready</div>
-            <div className="text-xs text-brand-600 mt-0.5">Gemini will scan your document and extract: client name, dates, services, emails, and more.</div>
+            <div className="text-xs text-brand-700 mt-0.5">Gemini will extract the client name, dates, services, and email addresses. Please review the result before saving.</div>
           </div>
         </div>
       )}
@@ -273,7 +273,7 @@ function UploadStep({
         onClick={onManualEntry}
         className="btn-secondary w-full justify-center py-3 text-sm font-semibold text-ink-800 hover:text-brand-600 hover:border-brand-300 transition-all"
       >
-        <Edit3 className="w-4 h-4 text-brand-600" /> Fill Contract Details Manually
+        <Edit3 className="w-4 h-4" /> Fill Contract Details Manually
       </button>
     </div>
   );
@@ -392,7 +392,7 @@ function ReviewStep({
       {/* Banner */}
       {isManual ? (
         <div className="card p-5 flex items-center gap-4 bg-brand-50 border-brand-200">
-          <div className="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+          <div className="w-12 h-12 rounded-sm bg-brand-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
             <Edit3 className="w-6 h-6" />
           </div>
           <div>
@@ -410,8 +410,8 @@ function ReviewStep({
         )}>
           <div className={`text-3xl font-bold ${confidenceColor(confidence)}`}>{Math.round(confidence * 100)}%</div>
           <div>
-            <div className={`text-sm font-semibold ${confidenceColor(confidence)}`}>{confidenceLabel(confidence)} Confidence Extraction</div>
-            <div className="text-xs text-ink-500 mt-0.5">{ext.extraction_notes || 'AI extracted contract data. Please review and correct any fields before saving.'}</div>
+            <div className={`text-sm font-semibold ${confidenceColor(confidence)}`}>{confidenceLabel(confidence)} confidence extraction</div>
+            <div className="text-xs text-ink-500 mt-0.5">{ext.extraction_notes || 'AI extracted the contract data. Please review and correct any fields before saving.'}</div>
           </div>
         </div>
       )}
@@ -561,13 +561,13 @@ function ReviewStep({
         </div>
 
         {services.length === 0 ? (
-          <div className="text-sm text-ink-400 text-center py-6 border-2 border-dashed border-ink-200 rounded-xl">
+          <div className="text-sm text-ink-400 text-center py-6 border-2 border-dashed border-ink-200 rounded-sm">
             No services yet. Click "Add Service" to add one.
           </div>
         ) : (
           <div className="space-y-4 mt-4">
             {services.map((s, i) => (
-              <div key={i} className="bg-ink-50 rounded-xl p-4 space-y-3">
+              <div key={i} className="bg-ink-50 rounded-sm p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-ink-600 uppercase tracking-wide">Service {i + 1}</span>
                   {services.length > 1 && (
@@ -781,7 +781,7 @@ function UploadPageContent() {
     <div className="animate-fade-in">
       {/* Mode selection switcher at top */}
       <div className="flex items-center justify-center mb-6">
-        <div className="bg-ink-100 p-1 rounded-xl flex gap-1 border border-ink-200 shadow-inner">
+        <div className="bg-ink-100 p-1 rounded-sm flex gap-1 border border-ink-200 shadow-inner">
           <button
             type="button"
             onClick={() => { setIsManual(false); setResult(null); setStep('upload'); }}
@@ -847,7 +847,7 @@ function UploadPageContent() {
       {step === 'extracting' && (
         <div className="max-w-2xl mx-auto card p-12 flex flex-col items-center gap-5">
           <div className="relative">
-            <div className="w-20 h-20 rounded-2xl bg-brand-50 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-sm bg-brand-50 flex items-center justify-center">
               <FileText className="w-10 h-10 text-brand-500" />
             </div>
             <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center">
@@ -855,8 +855,8 @@ function UploadPageContent() {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-ink-900">Analyzing your document…</div>
-            <div className="text-sm text-ink-400 mt-1">Gemini AI is scanning for client names, dates, services, and more. This takes 10–30 seconds.</div>
+            <div className="font-serif text-lg text-ink-900">Analyzing your document</div>
+            <div className="text-sm text-ink-500 mt-1">Gemini is extracting the client name, dates, services, and contacts. This usually takes 10–30 seconds.</div>
           </div>
           <div className="flex gap-2 flex-wrap justify-center">
             {['Client Name', 'Contract Dates', 'Services', 'Email IDs', 'Renewal Terms'].map((item) => (

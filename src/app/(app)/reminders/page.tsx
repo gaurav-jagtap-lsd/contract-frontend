@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { remindersApi } from '@/lib/api';
 import type { ReminderLog } from '@/types';
-import { Bell, Loader2, Mail, Clock, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, CheckCircle } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -22,26 +22,19 @@ export default function RemindersPage() {
     <div className="space-y-5 animate-fade-in">
       <div>
         <div className="page-header">Reminders</div>
-        <div className="page-subtitle">History of all automated renewal reminder emails sent.</div>
+        <div className="page-subtitle">History of automated renewal reminder emails.</div>
       </div>
 
       {/* Info card */}
-      <div className="card p-5 bg-brand-50 border-brand-200">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0">
-            <Bell className="w-5 h-5 text-brand-600" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-brand-900">Automatic Reminder Schedule</div>
-            <div className="text-xs text-brand-600 mt-1 space-y-1">
-              <div className="flex items-center gap-2"><Clock className="w-3 h-3" /> <strong>31–60 days</strong> before expiry: Weekly reminder</div>
-              <div className="flex items-center gap-2"><Clock className="w-3 h-3" /> <strong>1–30 days</strong> before expiry: Every 2 days</div>
-              <div className="flex items-center gap-2"><Clock className="w-3 h-3" /> <strong>After expiry</strong>: Daily for 7 days, then stopped</div>
-            </div>
-            <div className="text-xs text-brand-500 mt-2">
-              Reminders are paused per contract or per client. Go to a contract or client to pause/resume.
-            </div>
-          </div>
+      <div className="card">
+        <div className="px-5 py-4 border-b border-ink-200">
+          <div className="font-serif text-lg text-ink-900">Automatic Reminder Schedule</div>
+        </div>
+        <div className="px-5 py-4 text-sm text-ink-700 space-y-2">
+          <div><strong>31–60 days</strong> before expiry: weekly reminder.</div>
+          <div><strong>1–30 days</strong> before expiry: every 2 days.</div>
+          <div><strong>After expiry</strong>: daily for 7 days, then stopped.</div>
+          <div className="text-xs text-ink-500 pt-2">Reminders can be paused per contract or per client.</div>
         </div>
       </div>
 

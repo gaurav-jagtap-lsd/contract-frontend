@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import AuthShell from '@/components/layout/AuthShell';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, FileSearch, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const { login, firebaseUser, loading } = useAuth();
@@ -47,14 +47,12 @@ export default function LoginPage() {
 
   return (
     <AuthShell>
-      <div className="flex items-center gap-2 mb-8 lg:hidden">
-        <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
-          <FileSearch className="w-4 h-4 text-white" />
-        </div>
-        <span className="text-lg font-semibold text-ink-900">ContractVault</span>
+      <div className="mb-8 lg:hidden">
+        <div className="font-serif text-2xl text-ink-900 leading-none">ContractVault</div>
+        <div className="mt-1.5 text-[10px] uppercase tracking-[0.18em] text-ink-500">AI Contract Management</div>
       </div>
-      <h1 className="text-2xl font-bold text-ink-900 tracking-tight">Welcome back</h1>
-      <p className="text-ink-500 mt-1.5 text-sm">Sign in to continue managing contracts.</p>
+      <h1 className="text-[1.75rem] text-ink-900">Welcome back</h1>
+      <p className="text-ink-500 mt-2 text-sm">Sign in to continue managing contracts.</p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
         <div>

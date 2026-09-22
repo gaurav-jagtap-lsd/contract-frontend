@@ -224,7 +224,7 @@ export default function ContractDetailPage() {
         </div>
 
         {contract.is_paused && (
-          <div className="mt-4 flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <div className="mt-4 flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-sm px-4 py-3">
             <Pause className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <div>
               <div className="text-sm font-medium text-amber-800">Reminders paused</div>
@@ -298,7 +298,7 @@ export default function ContractDetailPage() {
               </div>
               <div className="space-y-3">
                 {contract.services.map((s, i) => (
-                  <div key={i} className="bg-ink-50 rounded-xl p-4">
+                  <div key={i} className="bg-ink-50 rounded-sm p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <div className="text-sm font-medium text-ink-900">{s.service_name}</div>
@@ -419,7 +419,7 @@ export default function ContractDetailPage() {
                 {comments.map((c) => (
                   <div
                     key={c.id}
-                    className="group bg-ink-50 rounded-xl px-3 py-2.5 border border-ink-100"
+                    className="group bg-ink-50 rounded-sm px-3 py-2.5 border border-ink-100"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-xs text-ink-800 leading-relaxed flex-1 whitespace-pre-wrap">{c.text}</p>

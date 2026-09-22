@@ -86,7 +86,7 @@ function CommentsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-fade-in"
+        className="relative bg-white rounded-sm shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -121,7 +121,7 @@ function CommentsModal({
             </div>
           ) : (
             comments.map((c) => (
-              <div key={c.id} className="group bg-ink-50 rounded-xl px-3.5 py-3 border border-ink-100">
+              <div key={c.id} className="group bg-ink-50 rounded-sm px-3.5 py-3 border border-ink-100">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm text-ink-800 leading-relaxed flex-1 whitespace-pre-wrap">{c.text}</p>
                   <button
@@ -147,7 +147,7 @@ function CommentsModal({
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAdd(); }}
-            className="w-full text-sm rounded-xl border border-ink-200 p-3 text-ink-800 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent resize-none bg-white"
+            className="w-full text-sm rounded-sm border border-ink-200 p-3 text-ink-800 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent resize-none bg-white"
           />
           <button
             onClick={handleAdd}
@@ -253,14 +253,14 @@ export default function ContractsPage() {
           <Link
             href="/upload"
             className="btn-secondary text-xs"
-            title="Upload PDF or image and let AI extract contract details"
+            title="Upload a PDF or image and extract contract details with AI"
           >
-            <Upload className="w-3.5 h-3.5 text-brand-600" /> Upload (AI)
+            <Upload className="w-3.5 h-3.5" /> Upload (AI)
           </Link>
           <Link
             href="/upload?mode=manual"
             className="btn-primary text-xs"
-            title="Create a contract and enter details manually"
+            title="Create a contract and enter the details manually"
           >
             <Plus className="w-3.5 h-3.5" /> Fill Manually
           </Link>
@@ -318,7 +318,7 @@ export default function ContractsPage() {
             {!debouncedSearch && !statusFilter && (
               <div className="flex items-center gap-2 mt-1">
                 <Link href="/upload" className="btn-secondary text-xs">
-                  <Upload className="w-3.5 h-3.5 text-brand-600" /> Upload (AI)
+                  <Upload className="w-3.5 h-3.5" /> Upload (AI)
                 </Link>
                 <Link href="/upload?mode=manual" className="btn-primary text-xs">
                   <Plus className="w-3.5 h-3.5" /> Fill Manually

@@ -35,7 +35,7 @@ export default function SettingsPage() {
       {/* Profile */}
       <div className="card p-5 sm:p-6">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-lg font-bold ring-1 ring-brand-200">
+          <div className="w-14 h-14 bg-ink-900 text-ink-50 flex items-center justify-center text-lg font-medium">
             {getInitials(user?.display_name || user?.email || 'U')}
           </div>
           <div>
@@ -94,7 +94,7 @@ export default function SettingsPage() {
           <h2 className="text-sm font-semibold text-ink-900">Reminder System</h2>
         </div>
         <div className="space-y-3 text-sm text-ink-600">
-          <div className="flex items-start gap-3 bg-ink-50 rounded-xl p-4">
+          <div className="flex items-start gap-3 bg-ink-50 rounded-sm p-4">
             <div className="text-2xl">📅</div>
             <div>
               <div className="font-medium text-ink-800">Automated Scheduling</div>
@@ -103,7 +103,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-          <div className="flex items-start gap-3 bg-ink-50 rounded-xl p-4">
+          <div className="flex items-start gap-3 bg-ink-50 rounded-sm p-4">
             <div className="text-2xl">📧</div>
             <div>
               <div className="font-medium text-ink-800">Email Provider</div>
@@ -112,7 +112,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-          <div className="flex items-start gap-3 bg-ink-50 rounded-xl p-4">
+          <div className="flex items-start gap-3 bg-ink-50 rounded-sm p-4">
             <div className="text-2xl">⏸️</div>
             <div>
               <div className="font-medium text-ink-800">Pause & Snooze</div>

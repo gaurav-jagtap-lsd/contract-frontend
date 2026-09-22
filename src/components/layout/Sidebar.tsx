@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, FileText, Upload, Users, Bell, Settings, FileSearch, ClipboardList, X, Sparkles,
+  LayoutDashboard, FileText, Upload, Users, Bell, Settings, ClipboardList, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useShell } from '@/context/ShellContext';
@@ -25,7 +25,7 @@ export default function Sidebar() {
     <>
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-ink-950/50 backdrop-blur-sm transition-opacity lg:hidden',
+          'fixed inset-0 z-40 bg-ink-950/40 transition-opacity lg:hidden',
           sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
         onClick={closeSidebar}
@@ -33,35 +33,27 @@ export default function Sidebar() {
       />
       <aside
         className={cn(
-          'fixed top-0 left-0 h-dvh w-60 bg-ink-950 text-white flex flex-col z-50',
+          'fixed top-0 left-0 h-dvh w-[232px] bg-[#efeae2] border-r border-ink-200 flex flex-col z-50',
           'transition-transform duration-200 ease-out',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="h-16 flex items-center justify-between px-5 border-b border-white/10">
-          <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0" onClick={closeSidebar}>
-            <div className="w-8 h-8 rounded-xl bg-brand-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-500/30">
-              <FileSearch className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-white leading-tight truncate">ContractVault</div>
-              <div className="text-[10px] text-slate-400 leading-tight">AI workspace</div>
-            </div>
+        <div className="px-5 pt-6 pb-5 border-b border-ink-200 flex items-start justify-between">
+          <Link href="/dashboard" className="min-w-0" onClick={closeSidebar}>
+            <div className="font-serif text-[1.15rem] leading-none text-ink-900">ContractVault</div>
+            <div className="mt-1.5 text-[10px] uppercase tracking-[0.18em] text-ink-500">AI Contract Management</div>
           </Link>
           <button
             type="button"
             onClick={closeSidebar}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
+            className="lg:hidden p-1 text-ink-500 hover:text-ink-900"
             aria-label="Close menu"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          <div className="px-3 mb-2">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Menu</span>
-          </div>
+        <nav className="flex-1 py-3 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
             return (
@@ -71,26 +63,18 @@ export default function Sidebar() {
                 onClick={closeSidebar}
                 className={cn(isActive ? 'sidebar-link-active' : 'sidebar-link')}
               >
-                <item.icon className="w-4 h-4 flex-shrink-0" />
-                <span className="flex-1">{item.label}</span>
+                <item.icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="px-4 py-4 border-t border-white/10">
-          <Link
-            href="/upload"
-            onClick={closeSidebar}
-            className="block rounded-2xl bg-brand-600 p-3.5 hover:bg-brand-500 transition-colors shadow-lg shadow-brand-900/40"
-          >
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
-              <Sparkles className="w-3.5 h-3.5" /> AI Extraction
-            </div>
-            <div className="text-[11px] text-white/75 leading-relaxed mt-1">
-              Upload a contract and let Gemini fill the details.
-            </div>
-            <div className="mt-2 text-xs font-semibold text-white">Upload now →</div>
+        <div className="px-5 py-4 border-t border-ink-200">
+          <div className="text-[10px] uppercase tracking-[0.16em] text-ink-400">AI Extraction</div>
+          <p className="mt-2 text-xs text-ink-600 leading-relaxed">Upload a contract and let Gemini fill the details.</p>
+          <Link href="/upload" onClick={closeSidebar} className="mt-2 block text-sm text-brand-800 hover:text-brand-950">
+            Upload now
           </Link>
         </div>
       </aside>

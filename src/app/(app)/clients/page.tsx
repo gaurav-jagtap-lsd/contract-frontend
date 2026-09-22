@@ -53,7 +53,7 @@ function ClientModal({
 
   return (
     <div className="fixed inset-0 bg-ink-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-modal w-full max-w-md animate-fade-in ring-1 ring-ink-200">
+      <div className="bg-white rounded-sm shadow-modal w-full max-w-md animate-fade-in ring-1 ring-ink-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink-100">
           <h2 className="text-base font-semibold text-ink-900">{isEdit ? 'Edit Client' : 'New Client'}</h2>
           <button onClick={onClose} className="p-1.5 text-ink-400 hover:text-ink-700 hover:bg-ink-100 rounded-lg transition-colors">
@@ -208,7 +208,7 @@ export default function ClientsPage() {
             <div key={c.id} className={cn('card p-5 group hover:shadow-card-hover transition-shadow', c.is_paused ? 'opacity-75' : '')}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-700 font-bold text-sm flex-shrink-0">
+                  <div className="w-10 h-10 rounded-sm bg-brand-100 flex items-center justify-center text-brand-700 font-bold text-sm flex-shrink-0">
                     {getInitials(c.client_name)}
                   </div>
                   <div>

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, FileSearch, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import AuthShell from '@/components/layout/AuthShell';
 
 export default function RegisterPage() {
@@ -45,14 +45,12 @@ export default function RegisterPage() {
 
   return (
     <AuthShell>
-      <div className="flex items-center gap-2 mb-8 lg:hidden">
-        <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
-          <FileSearch className="w-4 h-4 text-white" />
-        </div>
-        <span className="text-lg font-semibold text-ink-900">ContractVault</span>
+      <div className="mb-8 lg:hidden">
+        <div className="font-serif text-2xl text-ink-900 leading-none">ContractVault</div>
+        <div className="mt-1.5 text-[10px] uppercase tracking-[0.18em] text-ink-500">AI Contract Management</div>
       </div>
-      <h1 className="text-2xl font-bold text-ink-900 tracking-tight">Create your account</h1>
-      <p className="text-sm text-ink-500 mt-1.5 mb-6">Start managing contracts with AI-powered extraction.</p>
+      <h1 className="text-[1.75rem] text-ink-900">Create your account</h1>
+      <p className="text-sm text-ink-500 mt-2 mb-6">Start managing contracts with AI-powered extraction.</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
           <div>
