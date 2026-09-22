@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { authApi } from '@/lib/api';
 import { User, Lock, Bell, Shield, Loader2, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getInitials } from '@/lib/utils';
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -32,10 +33,19 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile */}
-      <div className="card p-5">
+      <div className="card p-5 sm:p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-lg font-bold ring-1 ring-brand-200">
+            {getInitials(user?.display_name || user?.email || 'U')}
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-ink-900">{user?.display_name || 'Account'}</h2>
+            <p className="text-sm text-ink-500">{user?.email}</p>
+          </div>
+        </div>
         <div className="flex items-center gap-3 mb-5">
           <User className="w-4 h-4 text-brand-500" />
-          <h2 className="text-sm font-semibold text-ink-900">Account Profile</h2>
+          <h3 className="text-sm font-semibold text-ink-900">Account Profile</h3>
         </div>
         <div className="space-y-3">
           <div>
@@ -143,7 +153,7 @@ export default function SettingsPage() {
       {/* Danger zone */}
       <div className="card p-5 border-red-100">
         <h2 className="text-sm font-semibold text-red-600 mb-4">Danger Zone</h2>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <div className="text-sm font-medium text-ink-800">Sign out everywhere</div>
             <div className="text-xs text-ink-400">Terminate your current session.</div>

@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, FileText, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, FileSearch, Loader2 } from 'lucide-react';
+import AuthShell from '@/components/layout/AuthShell';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -43,19 +44,17 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ink-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-modal p-8">
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
-            <FileText className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold text-ink-900">ContractVault</span>
+    <AuthShell>
+      <div className="flex items-center gap-2 mb-8 lg:hidden">
+        <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
+          <FileSearch className="w-4 h-4 text-white" />
         </div>
+        <span className="text-lg font-semibold text-ink-900">ContractVault</span>
+      </div>
+      <h1 className="text-2xl font-bold text-ink-900 tracking-tight">Create your account</h1>
+      <p className="text-sm text-ink-500 mt-1.5 mb-6">Start managing contracts with AI-powered extraction.</p>
 
-        <h1 className="text-xl font-bold text-ink-900 mb-1">Create your account</h1>
-        <p className="text-sm text-ink-500 mb-6">Start managing contracts with AI-powered extraction.</p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="label">Full name <span className="text-red-500">*</span></label>
             <input
@@ -120,7 +119,6 @@ export default function RegisterPage() {
           Already have an account?{' '}
           <Link href="/login" className="text-brand-600 font-medium hover:text-brand-700">Sign in</Link>
         </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

@@ -244,7 +244,7 @@ export default function ContractsPage() {
     <div className="space-y-5 animate-fade-in">
       {/* Header */}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="page-header">Contracts</div>
           <div className="page-subtitle">Manage and track all client agreements.</div>

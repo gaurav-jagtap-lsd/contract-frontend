@@ -203,8 +203,9 @@ export default function ContractDetailPage() {
       <div className="card p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-xl font-bold text-ink-900">{contract.contract_name}</h1>
-            <div className="text-sm text-ink-500 mt-1">{contract.client_name}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Client</div>
+            <h1 className="text-xl font-bold text-ink-900 mt-0.5">{contract.client_name}</h1>
+            <div className="text-sm text-ink-500 mt-1">{contract.contract_name}</div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <span className={`badge text-sm px-3 py-1 ${statusColor(status)}`}>{statusLabel(status)}</span>

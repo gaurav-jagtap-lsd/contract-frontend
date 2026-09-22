@@ -52,8 +52,8 @@ function ClientModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-modal w-full max-w-md animate-fade-in">
+    <div className="fixed inset-0 bg-ink-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-modal w-full max-w-md animate-fade-in ring-1 ring-ink-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink-100">
           <h2 className="text-base font-semibold text-ink-900">{isEdit ? 'Edit Client' : 'New Client'}</h2>
           <button onClick={onClose} className="p-1.5 text-ink-400 hover:text-ink-700 hover:bg-ink-100 rounded-lg transition-colors">
@@ -162,7 +162,7 @@ export default function ClientsPage() {
         />
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="page-header">Clients</div>
           <div className="page-subtitle">Manage client profiles and reminder settings.</div>
