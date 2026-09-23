@@ -89,6 +89,7 @@ export interface Contract {
   pipeline_updated_by?: string;
   pipeline_updated_by_name?: string;
   pipeline_updated_at?: string;
+  comment_count?: number;
 }
 
 export interface ContractComment {

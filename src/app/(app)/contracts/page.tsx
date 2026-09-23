@@ -29,12 +29,14 @@ function CommentsModal({
   contractId,
   contractName,
   onClose,
+  onCountChange,
   canWriteComment,
   canRemoveComment,
 }: {
   contractId: string;
   contractName: string;
   onClose: () => void;
+  onCountChange: (count: number) => void;
   canWriteComment: boolean;
   canRemoveComment: boolean;
 }) {
@@ -47,7 +49,9 @@ function CommentsModal({
   const loadComments = async () => {
     try {
       const res = await contractsApi.getComments(contractId);
-      setComments(res.data.data.comments ?? []);
+      const next = res.data.data.comments ?? [];
+      setComments(next);
+      onCountChange(next.length);
     } catch {} finally {
       setLoading(false);
     }
@@ -63,7 +67,11 @@ function CommentsModal({
       setText('');
       const newComment = res?.data?.data?.comment;
       if (newComment) {
-        setComments((prev) => [newComment, ...prev.filter((c) => c.id !== newComment.id)]);
+        setComments((prev) => {
+          const next = [newComment, ...prev.filter((c) => c.id !== newComment.id)];
+          onCountChange(next.length);
+          return next;
+        });
       }
       await loadComments();
       toast.success('Comment added.');
@@ -80,7 +88,11 @@ function CommentsModal({
     setDeletingId(commentId);
     try {
       await contractsApi.deleteComment(contractId, commentId);
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      setComments((prev) => {
+        const next = prev.filter((c) => c.id !== commentId);
+        onCountChange(next.length);
+        return next;
+      });
     } catch {
       toast.error('We could not delete that comment. Please try again.');
     } finally {
@@ -475,10 +487,16 @@ export default function ContractsPage() {
                           )}
                           <button
                             onClick={() => setCommentsModalFor({ id: c.id, name: c.contract_name })}
-                            className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
-                            title="Comments"
+                            className="relative p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                            title={c.comment_count ? `${c.comment_count} comments` : 'Comments'}
                           >
                             <MessageSquare className="w-4 h-4" />
+                            <span className={cn(
+                              'absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-semibold leading-4 text-center',
+                              (c.comment_count ?? 0) > 0 ? 'bg-brand-600 text-white' : 'bg-ink-200 text-ink-600'
+                            )}>
+                              {c.comment_count ?? 0}
+                            </span>
                           </button>
                           {write && (
                           <button
@@ -525,6 +543,11 @@ export default function ContractsPage() {
         contractName={commentsModalFor.name}
         canWriteComment={write}
         canRemoveComment={remove}
+        onCountChange={(count) => {
+          setContracts((prev) => prev.map((item) => (
+            item.id === commentsModalFor.id ? { ...item, comment_count: count } : item
+          )));
+        }}
         onClose={() => setCommentsModalFor(null)}
       />
     )}
