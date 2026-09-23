@@ -15,6 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/reminders': 'Reminders',
   '/audit': 'Audit Log',
   '/settings': 'Settings',
+  '/team': 'Team',
 };
 
 export default function TopBar() {

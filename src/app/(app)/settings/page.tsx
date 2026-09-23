@@ -5,6 +5,7 @@ import { authApi } from '@/lib/api';
 import { User, Lock, Bell, Shield, Loader2, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getInitials } from '@/lib/utils';
+import { roleLabel } from '@/lib/permissions';
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -58,7 +59,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className="label">Role</label>
-            <div className="input bg-ink-50 text-ink-500 cursor-not-allowed capitalize">{user?.role || 'admin'}</div>
+            <div className="input bg-ink-50 text-ink-500 cursor-not-allowed">{roleLabel(user?.role)}</div>
           </div>
         </div>
         <p className="text-xs text-ink-400 mt-3">

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { canDelete, canWrite } from '@/lib/permissions';
 import { useSearchParams } from 'next/navigation';
 import { contractsApi } from '@/lib/api';
 import type { Contract, ContractComment, PipelineStep } from '@/types';
@@ -11,6 +12,7 @@ import {
   X, MessageSquare, Send,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 
@@ -27,10 +29,14 @@ function CommentsModal({
   contractId,
   contractName,
   onClose,
+  canWriteComment,
+  canRemoveComment,
 }: {
   contractId: string;
   contractName: string;
   onClose: () => void;
+  canWriteComment: boolean;
+  canRemoveComment: boolean;
 }) {
   const [comments, setComments] = useState<ContractComment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,6 +130,7 @@ function CommentsModal({
               <div key={c.id} className="group bg-ink-50 rounded-sm px-3.5 py-3 border border-ink-100">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm text-ink-800 leading-relaxed flex-1 whitespace-pre-wrap">{c.text}</p>
+                  {canRemoveComment && (
                   <button
                     onClick={() => handleDelete(c.id)}
                     disabled={deletingId === c.id}
@@ -132,6 +139,7 @@ function CommentsModal({
                   >
                     {deletingId === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
                   </button>
+                  )}
                 </div>
                 <div className="text-[10px] text-ink-400 mt-1.5">{formatDate(c.created_at)}</div>
               </div>
@@ -140,6 +148,7 @@ function CommentsModal({
         </div>
 
         {/* Add comment */}
+        {canWriteComment && (
         <div className="px-5 py-4 border-t border-ink-100 space-y-2">
           <textarea
             rows={3}
@@ -158,6 +167,7 @@ function CommentsModal({
             {submitting ? 'Posting…' : 'Post Comment'}
           </button>
         </div>
+        )}
       </div>
     </div>
   );
@@ -166,6 +176,9 @@ function CommentsModal({
 
 
 export default function ContractsPage() {
+  const { user } = useAuth();
+  const write = canWrite(user?.role);
+  const remove = canDelete(user?.role);
   const searchParams = useSearchParams();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
@@ -249,6 +262,7 @@ export default function ContractsPage() {
           <div className="page-header">Contracts</div>
           <div className="page-subtitle">Manage and track all client agreements.</div>
         </div>
+        {write && (
         <div className="flex items-center gap-2">
           <Link
             href="/upload"
@@ -265,6 +279,7 @@ export default function ContractsPage() {
             <Plus className="w-3.5 h-3.5" /> Fill Manually
           </Link>
         </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -315,7 +330,7 @@ export default function ContractsPage() {
                 ? 'No contracts match your filters.'
                 : 'No contracts yet.'}
             </div>
-            {!debouncedSearch && !statusFilter && (
+            {write && !debouncedSearch && !statusFilter && (
               <div className="flex items-center gap-2 mt-1">
                 <Link href="/upload" className="btn-secondary text-xs">
                   <Upload className="w-3.5 h-3.5" /> Upload (AI)
@@ -424,7 +439,7 @@ export default function ContractsPage() {
                             pipelineStepClass(step)
                           )}
                           value={step}
-                          disabled={updatingStepId === c.id}
+                          disabled={!write || updatingStepId === c.id}
                           onClick={(e) => e.stopPropagation()}
                           onChange={(e) => handleStepChange(c.id, e.target.value as PipelineStep)}
                         >
@@ -438,9 +453,11 @@ export default function ContractsPage() {
                           <Link href={`/contracts/${c.id}`} className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View">
                             <Eye className="w-4 h-4" />
                           </Link>
+                          {write && (
                           <Link href={`/contracts/${c.id}/edit`} className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="Edit">
                             <Edit2 className="w-4 h-4" />
                           </Link>
+                          )}
                           <button
                             onClick={() => setCommentsModalFor({ id: c.id, name: c.contract_name })}
                             className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
@@ -448,6 +465,7 @@ export default function ContractsPage() {
                           >
                             <MessageSquare className="w-4 h-4" />
                           </button>
+                          {write && (
                           <button
                             onClick={() => handlePause(c.id, c.is_paused)}
                             className="p-1.5 text-ink-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
@@ -455,6 +473,8 @@ export default function ContractsPage() {
                           >
                             {c.is_paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
                           </button>
+                          )}
+                          {remove && (
                           <button
                             onClick={() => handleDelete(c.id, c.contract_name)}
                             className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -462,6 +482,7 @@ export default function ContractsPage() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
+                          )}
                         </div>
                       </td>
 
@@ -487,6 +508,8 @@ export default function ContractsPage() {
       <CommentsModal
         contractId={commentsModalFor.id}
         contractName={commentsModalFor.name}
+        canWriteComment={write}
+        canRemoveComment={remove}
         onClose={() => setCommentsModalFor(null)}
       />
     )}

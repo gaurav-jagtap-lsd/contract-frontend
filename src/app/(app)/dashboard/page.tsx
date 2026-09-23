@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { dashboardApi, contractsApi } from '@/lib/api';
 import type { DashboardSummary, Contract } from '@/types';
 import { formatDate, daysRemaining, statusColor, statusLabel, pipelineStepClass } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { canWrite } from '@/lib/permissions';
 import {
   Upload, ChevronRight, Search, Loader2,
 } from 'lucide-react';
@@ -27,6 +29,8 @@ function StatCard({
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const write = canWrite(user?.role);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [charts, setCharts] = useState<{
     monthly_expiry_trend: { month: string; count: number }[];
@@ -108,9 +112,11 @@ export default function DashboardPage() {
           <div className="page-header">Dashboard</div>
           <div className="page-subtitle">Overview of clients, contracts, and upcoming renewals.</div>
         </div>
-        <Link href="/upload" className="btn-primary text-xs self-start sm:self-auto">
-          <Upload className="w-3.5 h-3.5" /> Upload Contract
-        </Link>
+        {write && (
+          <Link href="/upload" className="btn-primary text-xs self-start sm:self-auto">
+            <Upload className="w-3.5 h-3.5" /> Upload Contract
+          </Link>
+        )}
       </div>
 
       <div className="card p-4">

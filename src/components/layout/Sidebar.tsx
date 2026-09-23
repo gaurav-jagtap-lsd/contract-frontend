@@ -4,22 +4,32 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, FileText, Upload, Users, Bell, Settings, ClipboardList, X,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { canManageUsers, canWrite, normalizeRole } from '@/lib/permissions';
 import { useShell } from '@/context/ShellContext';
+import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/contracts', label: 'Contracts', icon: FileText },
-  { href: '/upload', label: 'Upload', icon: Upload },
-  { href: '/clients', label: 'Clients', icon: Users },
-  { href: '/reminders', label: 'Reminders', icon: Bell },
-  { href: '/audit', label: 'Audit Log', icon: ClipboardList },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, access: 'all' },
+  { href: '/contracts', label: 'Contracts', icon: FileText, access: 'all' },
+  { href: '/upload', label: 'Upload', icon: Upload, access: 'write' },
+  { href: '/clients', label: 'Clients', icon: Users, access: 'write' },
+  { href: '/reminders', label: 'Reminders', icon: Bell, access: 'write' },
+  { href: '/audit', label: 'Audit Log', icon: ClipboardList, access: 'write' },
+  { href: '/team', label: 'Team', icon: Users, access: 'admin' },
+  { href: '/settings', label: 'Settings', icon: Settings, access: 'all' },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, closeSidebar } = useShell();
+  const { user } = useAuth();
+  const role = normalizeRole(user?.role);
+  const items = NAV_ITEMS.filter((item) => {
+    if (item.access === 'admin') return canManageUsers(role);
+    if (item.access === 'write') return canWrite(role);
+    return true;
+  });
 
   return (
     <>
@@ -54,7 +64,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="flex-1 py-3 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
+          {items.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
             return (
               <Link
@@ -70,13 +80,15 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="px-5 py-4 border-t border-ink-200">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-ink-400">AI Extraction</div>
-          <p className="mt-2 text-xs text-ink-600 leading-relaxed">Upload a contract and let Gemini fill the details.</p>
-          <Link href="/upload" onClick={closeSidebar} className="mt-2 block text-sm text-brand-800 hover:text-brand-950">
-            Upload now
-          </Link>
-        </div>
+        {canWrite(role) && (
+          <div className="px-5 py-4 border-t border-ink-200">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-ink-400">AI Extraction</div>
+            <p className="mt-2 text-xs text-ink-600 leading-relaxed">Upload a contract and let Gemini fill the details.</p>
+            <Link href="/upload" onClick={closeSidebar} className="mt-2 block text-sm text-brand-800 hover:text-brand-950">
+              Upload now
+            </Link>
+          </div>
+        )}
       </aside>
     </>
   );

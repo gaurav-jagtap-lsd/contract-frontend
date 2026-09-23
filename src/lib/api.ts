@@ -30,6 +30,9 @@ export const authApi = {
   me: () => api.get('/api/auth/me/'),
   logout: () => api.post('/api/auth/logout/'),
   resetPassword: (email: string) => api.post('/api/auth/reset-password/', { email }),
+  users: () => api.get('/api/auth/users/'),
+  updateRole: (uid: string, role: 'admin' | 'editor' | 'viewer') =>
+    api.patch(`/api/auth/users/${uid}/`, { role }),
 };
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

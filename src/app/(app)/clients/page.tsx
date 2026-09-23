@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { clientsApi } from '@/lib/api';
 import type { Client } from '@/types';
 import { Users, Plus, Search, Trash2, Pause, Play, Mail, Loader2, X, Edit2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { canDelete, canWrite } from '@/lib/permissions';
 import toast from 'react-hot-toast';
 import { formatDate, getInitials } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -98,6 +100,9 @@ function ClientModal({
 }
 
 export default function ClientsPage() {
+  const { user } = useAuth();
+  const write = canWrite(user?.role);
+  const remove = canDelete(user?.role);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -167,9 +172,11 @@ export default function ClientsPage() {
           <div className="page-header">Clients</div>
           <div className="page-subtitle">Manage client profiles and reminder settings.</div>
         </div>
+        {write && (
         <button onClick={() => setModal({ open: true })} className="btn-primary">
           <Plus className="w-4 h-4" /> New Client
         </button>
+        )}
       </div>
 
       <div className="card p-4">
@@ -196,7 +203,7 @@ export default function ClientsPage() {
           <div className="text-sm font-medium text-ink-500">
             {clients.length === 0 ? 'No clients yet.' : 'No clients match your search.'}
           </div>
-          {clients.length === 0 && (
+          {clients.length === 0 && write && (
             <button onClick={() => setModal({ open: true })} className="btn-primary text-xs">
               <Plus className="w-3.5 h-3.5" /> Add your first client
             </button>
@@ -243,7 +250,9 @@ export default function ClientsPage() {
                 <div className="mt-3 text-xs text-ink-400 line-clamp-2 border-t border-ink-50 pt-3">{c.notes}</div>
               )}
 
-              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-ink-50 opacity-0 group-hover:opacity-100 transition-opacity">
+              {(write || remove) && (
+              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-ink-50">
+                {write && (
                 <button
                   onClick={() => setModal({ open: true, client: c })}
                   className="p-1.5 text-ink-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
@@ -251,6 +260,8 @@ export default function ClientsPage() {
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
+                )}
+                {write && (
                 <button
                   onClick={() => handlePauseResume(c)}
                   className="p-1.5 text-ink-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
@@ -258,6 +269,8 @@ export default function ClientsPage() {
                 >
                   {c.is_paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
                 </button>
+                )}
+                {remove && (
                 <button
                   onClick={() => handleDelete(c.id, c.client_name)}
                   className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-auto"
@@ -265,7 +278,9 @@ export default function ClientsPage() {
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
+                )}
               </div>
+              )}
             </div>
           ))}
         </div>

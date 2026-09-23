@@ -12,6 +12,8 @@ import {
   X, MessageSquare, Send,
 } from 'lucide-react';
 
+import { useAuth } from '@/context/AuthContext';
+import { canDelete, canWrite } from '@/lib/permissions';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
@@ -29,6 +31,9 @@ function FieldRow({ label, value, warn }: { label: string; value?: string | null
 }
 
 export default function ContractDetailPage() {
+  const { user } = useAuth();
+  const write = canWrite(user?.role);
+  const remove = canDelete(user?.role);
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [contract, setContract] = useState<Contract | null>(null);
@@ -182,20 +187,28 @@ export default function ContractDetailPage() {
               <ExternalLink className="w-3.5 h-3.5" /> View Document
             </a>
           )}
+          {write && (
           <button onClick={handleSendReminder} disabled={!!actionLoading} className="btn-secondary text-xs">
             {actionLoading === 'remind' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
             Send Reminder
           </button>
+          )}
+          {write && (
           <button onClick={handlePause} disabled={!!actionLoading} className="btn-secondary text-xs">
             {actionLoading === 'pause' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : contract.is_paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
             {contract.is_paused ? 'Resume' : 'Pause Reminders'}
           </button>
+          )}
+          {write && (
           <Link href={`/contracts/${id}/edit`} className="btn-secondary text-xs">
             Edit
           </Link>
+          )}
+          {remove && (
           <button onClick={handleDelete} className="btn-danger text-xs">
             <Trash2 className="w-3.5 h-3.5" /> Delete
           </button>
+          )}
         </div>
       </div>
 
@@ -423,6 +436,7 @@ export default function ContractDetailPage() {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-xs text-ink-800 leading-relaxed flex-1 whitespace-pre-wrap">{c.text}</p>
+                      {remove && (
                       <button
                         onClick={() => handleDeleteComment(c.id)}
                         disabled={deletingCommentId === c.id}
@@ -433,6 +447,7 @@ export default function ContractDetailPage() {
                           ? <Loader2 className="w-3 h-3 animate-spin" />
                           : <X className="w-3 h-3" />}
                       </button>
+                      )}
                     </div>
                     <div className="text-[10px] text-ink-400 mt-1.5">{formatDate(c.created_at)}</div>
                   </div>
@@ -443,6 +458,7 @@ export default function ContractDetailPage() {
             )}
 
             {/* Add comment input */}
+            {write && (
             <div className="space-y-2">
               <textarea
                 rows={3}
@@ -466,6 +482,7 @@ export default function ContractDetailPage() {
               </button>
               <p className="text-[10px] text-ink-400 text-center">Ctrl+Enter to submit</p>
             </div>
+            )}
           </div>
 
 
