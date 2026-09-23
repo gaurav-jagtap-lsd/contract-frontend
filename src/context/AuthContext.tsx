@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
@@ -60,18 +61,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, displayName: string) => {
     try {
-      await authApi.register(email, password, displayName);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      if (displayName) {
+        await updateProfile(cred.user, { displayName });
+      }
+      const token = await cred.user.getIdToken();
+      const res = await authApi.login(token, displayName);
+      setUser(res.data.data.user);
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } }).response?.status;
-      if (status !== 409) throw err;
+      const code = (err as { code?: string }).code || '';
+      if (code !== 'auth/email-already-in-use') throw err;
       try {
         await login(email, password);
-        return;
-      } catch {
-        throw new Error('An account with this email already exists. Sign in instead.');
+      } catch (signInErr: unknown) {
+        const signInCode = (signInErr as { code?: string }).code || '';
+        if (signInCode.includes('invalid-credential') || signInCode.includes('wrong-password')) {
+          throw new Error('This email is already registered. Sign in with your password, or reset it.');
+        }
+        throw signInErr;
       }
     }
-    await login(email, password);
   };
 
   const logout = async () => {

@@ -141,7 +141,7 @@ export function friendlyError(err: unknown, fallback: string): string {
   if (status === 401) return 'Your session has expired. Please sign in again.';
   if (status === 403) return 'You do not have permission to do that.';
   if (status === 404) return 'We could not find what you were looking for.';
-  if (status === 409) return 'That email is already registered. Sign in instead.';
+  if (status === 409) return 'This email is already registered. Sign in instead.';
   if (status && status >= 500) return 'Something went wrong on our side. Please try again.';
   if (ax.message && !looksTechnical(ax.message)) return ax.message;
   return fallback;

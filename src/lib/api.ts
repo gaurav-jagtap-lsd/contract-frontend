@@ -23,7 +23,8 @@ api.interceptors.request.use(async (config) => {
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 export const authApi = {
-  login: (id_token: string) => api.post('/api/auth/login/', { id_token }),
+  login: (id_token: string, display_name?: string) =>
+    api.post('/api/auth/login/', { id_token, display_name }),
   register: (email: string, password: string, display_name: string) =>
     api.post('/api/auth/register/', { email, password, display_name }),
   me: () => api.get('/api/auth/me/'),
