@@ -318,6 +318,15 @@ function ReviewStep({
   const [emails, setEmails] = useState<string[]>(ext.email_ids.length ? ext.email_ids : ['']);
   const [newClientName, setNewClientName] = useState(ext.client_name || '');
   const [createClient, setCreateClient] = useState(false);
+
+  useEffect(() => {
+    const wanted = (ext.client_name || '').trim().toLowerCase();
+    if (!wanted) return;
+    const match = clients.find((c) => c.client_name.trim().toLowerCase() === wanted);
+    if (!match) return;
+    setForm((prev) => (prev.client_id ? prev : { ...prev, client_id: match.id }));
+    setCreateClient(false);
+  }, [clients, ext.client_name]);
   const [uploadedStoragePath, setUploadedStoragePath] = useState(result.storage_path || '');
   const [uploadedFileName, setUploadedFileName] = useState(result.file_name || '');
   const [uploadingDoc, setUploadingDoc] = useState(false);
