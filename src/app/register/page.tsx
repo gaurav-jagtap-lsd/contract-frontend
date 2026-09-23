@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -13,9 +13,11 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ email: '', password: '', confirm: '', name: '' });
   const [showPass, setShowPass] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     if (!form.email || !form.password || !form.name) {
       toast.error('Please fill in all required fields.');
       return;
@@ -28,17 +30,22 @@ export default function RegisterPage() {
       toast.error('Passwords do not match.');
       return;
     }
+    submittingRef.current = true;
     setSubmitting(true);
     try {
       await register(form.email, form.password, form.name);
       toast.success('Account created! Welcome to ContractVault.');
       router.push('/dashboard');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        || (err as { message?: string })?.message
-        || 'Registration failed.';
-      toast.error(msg);
+      const ax = err as {
+        response?: { data?: { message?: string; error?: { message?: string } } };
+        message?: string;
+      };
+      const apiMsg = ax.response?.data?.error?.message || ax.response?.data?.message;
+      const raw = ax.message || '';
+      toast.error(apiMsg || (raw.startsWith('Request failed with status code') ? '' : raw) || 'Registration failed.');
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };

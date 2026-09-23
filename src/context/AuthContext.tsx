@@ -59,7 +59,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (email: string, password: string, displayName: string) => {
-    await authApi.register(email, password, displayName);
+    try {
+      await authApi.register(email, password, displayName);
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } }).response?.status;
+      if (status !== 409) throw err;
+      try {
+        await login(email, password);
+        return;
+      } catch {
+        throw new Error('An account with this email already exists. Sign in instead.');
+      }
+    }
     await login(email, password);
   };
 
