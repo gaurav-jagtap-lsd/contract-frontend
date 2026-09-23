@@ -141,7 +141,8 @@ function CommentsModal({
                   </button>
                   )}
                 </div>
-                <div className="text-[10px] text-ink-400 mt-1.5">{formatDate(c.created_at)}</div>
+                <div className="text-[11px] font-medium text-ink-700 mt-1.5">{c.author_name || 'Unknown'}</div>
+                <div className="text-[10px] text-ink-400">{formatDate(c.created_at)}</div>
               </div>
             ))
           )}
@@ -239,13 +240,17 @@ export default function ContractsPage() {
   };
 
   const handleStepChange = async (id: string, pipeline_step: PipelineStep) => {
-    const previous = contracts.find((c) => c.id === id)?.pipeline_step;
+    const previous = contracts.find((c) => c.id === id);
     setContracts((prev) => prev.map((c) => (c.id === id ? { ...c, pipeline_step } : c)));
     setUpdatingStepId(id);
     try {
-      await contractsApi.update(id, { pipeline_step });
+      const res = await contractsApi.update(id, { pipeline_step });
+      const updated = res.data?.data?.contract;
+      if (updated) {
+        setContracts((prev) => prev.map((c) => (c.id === id ? { ...c, ...updated } : c)));
+      }
     } catch {
-      setContracts((prev) => prev.map((c) => (c.id === id ? { ...c, pipeline_step: previous } : c)));
+      setContracts((prev) => prev.map((c) => (c.id === id && previous ? previous : c)));
       toast.error('We could not update the current state. Please try again.');
     } finally {
       setUpdatingStepId(null);
@@ -370,6 +375,11 @@ export default function ContractsPage() {
                       <td className="table-cell">
                         <div className="font-medium text-ink-900 text-sm truncate max-w-[180px]">{c.client_name}</div>
                         {c.service_type && <div className="text-xs text-ink-400 mt-0.5">{c.service_type}</div>}
+                        <div className="text-[11px] text-ink-500 mt-1">Added by {c.created_by_name || 'Unknown'}</div>
+                        <div className="text-[11px] text-ink-400">
+                          Last edited {formatDate(c.updated_at)}
+                          {c.updated_by_name ? ` by ${c.updated_by_name}` : ''}
+                        </div>
                       </td>
                       <td className="table-cell hidden md:table-cell text-ink-500">{formatDate(c.start_date)}</td>
                       <td className="table-cell">
@@ -447,6 +457,11 @@ export default function ContractsPage() {
                             <option key={option} value={option}>{option}</option>
                           ))}
                         </select>
+                        <div className="text-[11px] text-ink-400 mt-1 max-w-[170px] leading-snug">
+                          {c.pipeline_updated_by_name
+                            ? `State changed by ${c.pipeline_updated_by_name}${c.pipeline_updated_at ? ` · ${formatDate(c.pipeline_updated_at)}` : ''}`
+                            : 'State not changed yet'}
+                        </div>
                       </td>
                       <td className="table-cell">
                         <div className="flex items-center justify-end gap-0.5">

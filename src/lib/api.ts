@@ -33,6 +33,7 @@ export const authApi = {
   users: () => api.get('/api/auth/users/'),
   updateRole: (uid: string, role: 'admin' | 'editor' | 'viewer') =>
     api.patch(`/api/auth/users/${uid}/`, { role }),
+  removeUser: (uid: string) => api.delete(`/api/auth/users/${uid}/`),
 };
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

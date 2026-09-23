@@ -449,7 +449,8 @@ export default function ContractDetailPage() {
                       </button>
                       )}
                     </div>
-                    <div className="text-[10px] text-ink-400 mt-1.5">{formatDate(c.created_at)}</div>
+                    <div className="text-[11px] font-medium text-ink-700 mt-1.5">{c.author_name || 'Unknown'}</div>
+                    <div className="text-[10px] text-ink-400">{formatDate(c.created_at)}</div>
                   </div>
                 ))}
               </div>
@@ -491,13 +492,35 @@ export default function ContractDetailPage() {
           <div className="card p-5">
             <h2 className="text-sm font-semibold text-ink-900 mb-3">Metadata</h2>
             <div className="space-y-2 text-xs text-ink-500">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-3">
+                <span>Added by</span>
+                <span className="text-ink-800 text-right">{contract.created_by_name || 'Unknown'}</span>
+              </div>
+              <div className="flex justify-between gap-3">
                 <span>Created</span>
                 <span>{formatDate(contract.created_at)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Updated</span>
+              <div className="flex justify-between gap-3">
+                <span>Last edited</span>
                 <span>{formatDate(contract.updated_at)}</span>
+              </div>
+              {contract.updated_by_name && (
+                <div className="flex justify-between gap-3">
+                  <span>Last edited by</span>
+                  <span className="text-ink-800 text-right">{contract.updated_by_name}</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-3">
+                <span>Current state</span>
+                <span className="text-ink-800 text-right">{contract.pipeline_step || 'Initiated'}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span>State changed by</span>
+                <span className="text-ink-800 text-right">
+                  {contract.pipeline_updated_by_name
+                    ? `${contract.pipeline_updated_by_name}${contract.pipeline_updated_at ? ` · ${formatDate(contract.pipeline_updated_at)}` : ''}`
+                    : 'Not changed yet'}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Version</span>

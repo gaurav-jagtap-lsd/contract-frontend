@@ -83,6 +83,12 @@ export interface Contract {
   created_at: string;
   updated_at: string;
   pipeline_step?: PipelineStep | string;
+  created_by_name?: string;
+  updated_by?: string;
+  updated_by_name?: string;
+  pipeline_updated_by?: string;
+  pipeline_updated_by_name?: string;
+  pipeline_updated_at?: string;
 }
 
 export interface ContractComment {
@@ -91,6 +97,7 @@ export interface ContractComment {
   contract_name: string;
   owner_uid: string;
   author: string;
+  author_name?: string;
   text: string;
   created_at: string;
   updated_at: string;

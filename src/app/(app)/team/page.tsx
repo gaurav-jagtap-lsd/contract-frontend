@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { authApi } from '@/lib/api';
 import { friendlyError } from '@/lib/utils';
 import { roleLabel } from '@/lib/permissions';
+import { useAuth } from '@/context/AuthContext';
 import type { User } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type TeamUser = User & { protected?: boolean };
@@ -13,6 +14,7 @@ type TeamUser = User & { protected?: boolean };
 const ROLES: User['role'][] = ['admin', 'editor', 'viewer'];
 
 export default function TeamPage() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<TeamUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -41,6 +43,21 @@ export default function TeamPage() {
     }
   };
 
+  const removeUser = async (user: TeamUser) => {
+    const label = user.display_name || user.email;
+    if (!confirm(`Remove ${label}? They will not be able to sign in.`)) return;
+    setSavingId(user.uid);
+    try {
+      await authApi.removeUser(user.uid);
+      setUsers((prev) => prev.filter((item) => item.uid !== user.uid));
+      toast.success(`${label} has been removed.`);
+    } catch (err) {
+      toast.error(friendlyError(err, 'We could not remove that account.'));
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   return (
     <div className="space-y-5 animate-fade-in max-w-3xl">
       <div>
@@ -61,6 +78,7 @@ export default function TeamPage() {
               <tr>
                 <th className="table-header">Person</th>
                 <th className="table-header">Role</th>
+                <th className="table-header text-right"> </th>
               </tr>
             </thead>
             <tbody>
@@ -87,6 +105,19 @@ export default function TeamPage() {
                       </select>
                     )}
                   </td>
+                  <td className="table-cell text-right">
+                    {!user.protected && user.uid !== currentUser?.uid && (
+                      <button
+                        type="button"
+                        className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                        title={`Remove ${user.email}`}
+                        disabled={savingId === user.uid}
+                        onClick={() => removeUser(user)}
+                      >
+                        {savingId === user.uid ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -95,7 +126,7 @@ export default function TeamPage() {
       </div>
 
       <div className="text-sm text-ink-500 space-y-1">
-        <div><span className="text-ink-800">Admin</span> can view, create, edit, and delete, and can assign roles.</div>
+        <div><span className="text-ink-800">Admin</span> can view, create, edit, and delete, assign roles, and remove accounts.</div>
         <div><span className="text-ink-800">Editor</span> can add contracts and change their stage, but cannot delete.</div>
         <div><span className="text-ink-800">Viewer</span> can only look at contracts.</div>
       </div>
