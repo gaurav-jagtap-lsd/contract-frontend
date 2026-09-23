@@ -43,7 +43,7 @@ export default function AuditPage() {
     setLoading(true);
     auditApi.logs(resourceFilter ? { resource_type: resourceFilter } : {})
       .then((r) => setLogs(r.data.data.logs))
-      .catch(() => toast.error('Failed to load audit logs.'))
+      .catch(() => toast.error('We could not load the activity log. Please refresh and try again.'))
       .finally(() => setLoading(false));
   }, [resourceFilter]);
 

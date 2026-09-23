@@ -62,7 +62,7 @@ function CommentsModal({
       await loadComments();
       toast.success('Comment added.');
     } catch {
-      toast.error('Failed to add comment.');
+      toast.error('We could not add that comment. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -76,7 +76,7 @@ function CommentsModal({
       await contractsApi.deleteComment(contractId, commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
     } catch {
-      toast.error('Failed to delete.');
+      toast.error('We could not delete that comment. Please try again.');
     } finally {
       setDeletingId(null);
     }
@@ -189,7 +189,7 @@ export default function ContractsPage() {
       const res = await contractsApi.list(params);
       setContracts(res.data.data.contracts);
     } catch {
-      toast.error('Failed to load contracts.');
+      toast.error('We could not load contracts. Please refresh and try again.');
     } finally {
       setLoading(false);
     }
@@ -204,7 +204,7 @@ export default function ContractsPage() {
       toast.success('Contract deleted.');
       setContracts((prev) => prev.filter((c) => c.id !== id));
     } catch {
-      toast.error('Failed to delete contract.');
+      toast.error('We could not delete that contract. Please try again.');
     }
   };
 
@@ -221,7 +221,7 @@ export default function ContractsPage() {
       }
       load();
     } catch {
-      toast.error('Action failed.');
+      toast.error('That action did not go through. Please try again.');
     }
   };
 
@@ -233,7 +233,7 @@ export default function ContractsPage() {
       await contractsApi.update(id, { pipeline_step });
     } catch {
       setContracts((prev) => prev.map((c) => (c.id === id ? { ...c, pipeline_step: previous } : c)));
-      toast.error('Failed to update step.');
+      toast.error('We could not update the current state. Please try again.');
     } finally {
       setUpdatingStepId(null);
     }

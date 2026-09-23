@@ -14,7 +14,7 @@ export default function RemindersPage() {
   useEffect(() => {
     remindersApi.logs()
       .then((r) => setLogs(r.data.data.logs))
-      .catch(() => toast.error('Failed to load reminders.'))
+      .catch(() => toast.error('We could not load reminders. Please refresh and try again.'))
       .finally(() => setLoading(false));
   }, []);
 

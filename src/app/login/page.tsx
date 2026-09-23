@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import AuthShell from '@/components/layout/AuthShell';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { friendlyError } from '@/lib/utils';
 
 export default function LoginPage() {
   const { login, firebaseUser, loading } = useAuth();
@@ -31,15 +32,7 @@ export default function LoginPage() {
       toast.success('Welcome back!');
       router.push('/dashboard');
     } catch (err: unknown) {
-      const ax = err as { code?: string; message?: string };
-      const msg = ax?.message || 'Login failed.';
-      if (ax?.code === 'ERR_NETWORK' || msg === 'Network Error') {
-        toast.error('Cannot reach the API. Please try again in a moment.');
-      } else if (msg.includes('wrong-password') || msg.includes('user-not-found') || msg.includes('invalid-credential')) {
-        toast.error('Invalid email or password.');
-      } else {
-        toast.error(msg);
-      }
+      toast.error(friendlyError(err, 'We could not sign you in. Please try again.'));
     } finally {
       setSubmitting(false);
     }

@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import AuthShell from '@/components/layout/AuthShell';
+import { friendlyError } from '@/lib/utils';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -37,13 +38,7 @@ export default function RegisterPage() {
       toast.success('Account created! Welcome to ContractVault.');
       router.push('/dashboard');
     } catch (err: unknown) {
-      const ax = err as {
-        response?: { data?: { message?: string; error?: { message?: string } } };
-        message?: string;
-      };
-      const apiMsg = ax.response?.data?.error?.message || ax.response?.data?.message;
-      const raw = ax.message || '';
-      toast.error(apiMsg || (raw.startsWith('Request failed with status code') ? '' : raw) || 'Registration failed.');
+      toast.error(friendlyError(err, 'We could not create your account. Please try again.'));
     } finally {
       submittingRef.current = false;
       setSubmitting(false);

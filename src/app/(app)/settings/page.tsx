@@ -19,7 +19,7 @@ export default function SettingsPage() {
       setResetSent(true);
       toast.success('Password reset email sent!');
     } catch {
-      toast.error('Failed to send reset email.');
+      toast.error('We could not send the reset email. Please try again.');
     } finally {
       setResetLoading(false);
     }

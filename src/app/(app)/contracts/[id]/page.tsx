@@ -48,7 +48,7 @@ export default function ContractDetailPage() {
       const res = await contractsApi.get(id);
       setContract(res.data.data.contract);
     } catch {
-      toast.error('Contract not found.');
+      toast.error('We could not find that contract.');
       router.push('/contracts');
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export default function ContractDetailPage() {
       toast.success('Contract deleted.');
       router.push('/contracts');
     } catch {
-      toast.error('Delete failed.');
+      toast.error('We could not delete that contract. Please try again.');
     }
   };
 
@@ -102,7 +102,7 @@ export default function ContractDetailPage() {
       }
       await load();
     } catch {
-      toast.error('Action failed.');
+      toast.error('That action did not go through. Please try again.');
     } finally {
       setActionLoading('');
     }
@@ -114,7 +114,7 @@ export default function ContractDetailPage() {
       await remindersApi.sendManual(id);
       toast.success('Reminder email queued.');
     } catch {
-      toast.error('Failed to send reminder.');
+      toast.error('We could not send that reminder. Please try again.');
     } finally {
       setActionLoading('');
     }
@@ -133,7 +133,7 @@ export default function ContractDetailPage() {
       await loadComments();
       toast.success('Comment added.');
     } catch {
-      toast.error('Failed to add comment.');
+      toast.error('We could not add that comment. Please try again.');
     } finally {
       setAddingComment(false);
     }
@@ -148,7 +148,7 @@ export default function ContractDetailPage() {
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       toast.success('Comment deleted.');
     } catch {
-      toast.error('Failed to delete comment.');
+      toast.error('We could not delete that comment. Please try again.');
     } finally {
       setDeletingCommentId(null);
     }

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { contractsApi, clientsApi } from '@/lib/api';
 import type { Contract, Client, ContractService } from '@/types';
-import { computeContractDates } from '@/lib/utils';
+import { computeContractDates, friendlyError } from '@/lib/utils';
 import {
   ArrowLeft, Save, Plus, X, Loader2, Calendar, FileText, Tag, Mail,
   AlertTriangle, ChevronDown, CheckCircle,
@@ -202,7 +202,7 @@ export default function EditContractPage() {
         notes: c.notes || '',
       });
     } catch {
-      toast.error('Failed to load contract details.');
+      toast.error('We could not load this contract. Please go back and try again.');
       router.push('/contracts');
     } finally {
       setLoading(false);
@@ -271,8 +271,7 @@ export default function EditContractPage() {
       toast.success('Contract updated successfully!');
       router.push(`/contracts/${id}`);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to update contract.';
-      toast.error(msg);
+      toast.error(friendlyError(err, 'We could not save those changes. Please try again.'));
     } finally {
       setSaving(false);
     }

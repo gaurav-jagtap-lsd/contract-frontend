@@ -45,7 +45,7 @@ function ClientModal({
       onSave();
       onClose();
     } catch {
-      toast.error('Failed to save client.');
+      toast.error('We could not save this client. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -109,7 +109,7 @@ export default function ClientsPage() {
       const res = await clientsApi.list();
       setClients(res.data.data.clients);
     } catch {
-      toast.error('Failed to load clients.');
+      toast.error('We could not load clients. Please refresh and try again.');
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,7 @@ export default function ClientsPage() {
       toast.success('Client deleted.');
       setClients((prev) => prev.filter((c) => c.id !== id));
     } catch {
-      toast.error('Failed to delete client.');
+      toast.error('We could not delete that client. Please try again.');
     }
   };
 
@@ -148,7 +148,7 @@ export default function ClientsPage() {
       }
       load();
     } catch {
-      toast.error('Action failed.');
+      toast.error('That action did not go through. Please try again.');
     }
   };
 

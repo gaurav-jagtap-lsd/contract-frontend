@@ -95,6 +95,58 @@ export function pluralize(count: number, singular: string, plural?: string): str
   return `${count} ${count === 1 ? singular : (plural ?? singular + 's')}`;
 }
 
+function looksTechnical(text: string): boolean {
+  const value = text.toLowerCase();
+  return (
+    value.startsWith('request failed')
+    || value.includes('status code')
+    || value.includes('network error')
+    || value.startsWith('firebase:')
+    || value.includes('auth/')
+    || value.includes('traceback')
+    || value.includes('exception')
+    || value.includes('token')
+    || value.includes('errno')
+    || value.includes('undefined')
+    || value.includes('null')
+  );
+}
+
+export function friendlyError(err: unknown, fallback: string): string {
+  const ax = (err ?? {}) as {
+    code?: string;
+    message?: string;
+    response?: {
+      status?: number;
+      data?: { message?: string; error?: { message?: string } };
+    };
+  };
+  const status = ax.response?.status;
+  const code = ax.code || '';
+  const apiMessage = ax.response?.data?.error?.message || ax.response?.data?.message;
+
+  if (code === 'ERR_NETWORK' || ax.message === 'Network Error' || code === 'auth/network-request-failed') {
+    return 'We could not reach the server. Check your connection and try again.';
+  }
+  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+    return 'That email or password is not right.';
+  }
+  if (code.includes('email-already-in-use')) {
+    return 'An account with this email already exists. Sign in instead.';
+  }
+  if (code.includes('too-many-requests') || status === 429) {
+    return 'Too many attempts. Wait a moment and try again.';
+  }
+  if (apiMessage && !looksTechnical(apiMessage)) return apiMessage;
+  if (status === 401) return 'Your session has expired. Please sign in again.';
+  if (status === 403) return 'You do not have permission to do that.';
+  if (status === 404) return 'We could not find what you were looking for.';
+  if (status === 409) return 'That email is already registered. Sign in instead.';
+  if (status && status >= 500) return 'Something went wrong on our side. Please try again.';
+  if (ax.message && !looksTechnical(ax.message)) return ax.message;
+  return fallback;
+}
+
 export function computeContractDates(services: Array<{ start_date?: string | null; end_date?: string | null }>): {
   startDate: string;
   endDate: string;

@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { aiApi, contractsApi, clientsApi } from '@/lib/api';
 import type { ExtractionResult, Client, ContractService } from '@/types';
-import { formatBytes, confidenceColor, confidenceLabel, computeContractDates } from '@/lib/utils';
+import { formatBytes, confidenceColor, confidenceLabel, computeContractDates, friendlyError } from '@/lib/utils';
 import {
   Upload, FileText, Loader2, CheckCircle, AlertTriangle, X, Plus,
   ArrowRight, ArrowLeft, Save, ChevronDown, Edit3, Paperclip,
@@ -335,7 +335,7 @@ function ReviewStep({
       setUploadedFileName(res.data.data.file_name);
       toast.success('Document attached successfully!');
     } catch {
-      toast.error('Failed to attach document.');
+      toast.error('We could not attach that document. Please try again.');
     } finally {
       setUploadingDoc(false);
     }
@@ -732,8 +732,7 @@ function UploadPageContent() {
       setResult(res.data.data);
       setStep('review');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'AI extraction failed.';
-      toast.error(msg);
+      toast.error(friendlyError(err, 'We could not read that document. You can still enter the details yourself.'));
       setStep('upload');
     }
   };
@@ -770,8 +769,7 @@ function UploadPageContent() {
       toast.success('Contract saved successfully!');
       router.push(`/contracts/${contractRes.data.data.contract.id}`);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to save contract.';
-      toast.error(msg);
+      toast.error(friendlyError(err, 'We could not save this contract. Please try again.'));
     } finally {
       setSaving(false);
     }
